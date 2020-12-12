@@ -61,6 +61,7 @@ class BDLQuery():
         data = []
 
         self.params["page"] = 1
+        self.params["per_page"] = 100
 
         query_func(**query_params)
         data.extend(self.query_result["data"])
