@@ -44,19 +44,28 @@ class BDLQuery():
 
     def query_all_stats(self, **query_params):
         """
-        Stores a modified JSON object containing all of the data from the passed query parameters (ignoring the starting page number).
+        Stores a modified JSON object containing all of the stats data from the passed query parameters (ignoring the starting page number).
 
+        :param **query_params: Keyword arguments corresponding to parameters to be used in the API call (see https://www.balldontlie.io/ for more details on parameter conventions).
+        """
+        self.__query_all_data(self.query_stats, **query_params)
+
+    def __query_all_data(self, query_func, **query_params):
+        """
+        Retrieves all the data from the specified query parameters by using the passed function and stores said data.
+
+        :param func: The query function to be used to retrieve data.
         :param **query_params: Keyword arguments corresponding to parameters to be used in the API call (see https://www.balldontlie.io/ for more details on parameter conventions).
         """
         data = []
 
         self.params["page"] = 1
 
-        self.query_stats(**query_params)
+        query_func(**query_params)
         data.extend(self.query_result["data"])
 
         while(self.__update_page_request()):
-            self.query_stats(**query_params)
+            query_func(**query_params)
             data.extend(self.query_result["data"])
 
         self.data = data
