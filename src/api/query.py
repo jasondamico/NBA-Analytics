@@ -7,6 +7,7 @@ import requests
 stats_url = "https://www.balldontlie.io/api/v1/stats"
 players_url = "https://www.balldontlie.io/api/v1/players"
 games_url = "https://www.balldontlie.io/api/v1/games"
+season_stats_url = "https://www.balldontlie.io/api/v1/season_averages"
 array_fields = ["dates", "seasons", "player_ids", "game_ids"]
 
 class BDLQuery():
@@ -112,11 +113,36 @@ class BDLQuery():
         """
         self.__query_all_data(self.query_games, **query_params)
 
+    def query_season_stats(self, **query_params):
+        """
+        Stores the JSON object retrieved from passing the query parameters to the balldontlie season stats API.
+
+        :param **query_params: Keyword arguments corresponding to parameters to be used in the API call (see https://www.balldontlie.io/ for more details on parameter conventions).
+        """
+        self.__format_query_params(**query_params)
+
+        r = requests.get(season_stats_url, params=self.params)
+
+        self.query_result = r.json()
+
+    def query_all_season_stats(self, **query_params):
+        """
+        Stores a modified JSON object containing all of the seasons stats data from the passed query parameters (ignoring the starting page number).
+
+        :param **query_params: Keyword arguments corresponding to parameters to be used in the API call (see https://www.balldontlie.io/ for more details on parameter conventions).
+        """
+        self.__query_all_data(self.query_season_stats, **query_params)
+
     def __update_page_request(self):
         """
         Updates the page requested in the query parameters based on the next_page value stored within the passed JSON object.
-        """
-        next_page = self.query_result["meta"]["next_page"]
-        self.params["page"] = next_page
 
+        :return: The next page to be accessed. Returns None if the page limit is reached.
+        """
+        try:
+            next_page = self.query_result["meta"]["next_page"]
+        except KeyError:
+            return None
+        
+        self.params["page"] = next_page
         return next_page

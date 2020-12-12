@@ -19,6 +19,8 @@ class BallDontLieAPI(BDLToPandas):
         :param query_type: The type of query to be performed. Acceptable inputs are:
             - stats
             - players
+            - games
+            - season_stats
         :param single_page: A boolean corresponding to whether or not the user would like to query only a singular page of the API rather than accessing all pages available from the specified parameters. False by default.
         :param **query_params: Keyword arguments corresponding to parameters to be used in the API call (see https://www.balldontlie.io/ for more details on parameter conventions).
         """
@@ -31,6 +33,8 @@ class BallDontLieAPI(BDLToPandas):
                 self.query_all_players(**query_params)
             elif query_type == "games":
                 self.query_all_games(**query_params)
+            elif query_type == "season_stats":
+                self.query_all_season_stats(**query_params)
 
     def __single_page_query(self, query_type=None, **query_params):
         """
