@@ -6,7 +6,7 @@ import pandas as pd
 from query import *
 
 # Objects held within query results
-objects = ["player", "game", "team"]
+objects = ["player", "game", "team", "home_team", "visitor_team"]
 
 class BDLToPandas(BDLQuery):
 

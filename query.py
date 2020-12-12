@@ -6,6 +6,7 @@ import requests
 
 stats_url = "https://www.balldontlie.io/api/v1/stats"
 players_url = "https://www.balldontlie.io/api/v1/players"
+games_url = "https://www.balldontlie.io/api/v1/games"
 array_fields = ["dates", "seasons", "player_ids", "game_ids"]
 
 class BDLQuery():
@@ -89,6 +90,26 @@ class BDLQuery():
         :param **query_params: Keyword arguments corresponding to parameters to be used in the API call (see https://www.balldontlie.io/ for more details on parameter conventions).
         """
         self.__query_all_data(self.query_players, **query_params)
+
+    def query_games(self, **query_params):
+        """
+        Stores the JSON object retrieved from passing the query parameters to the balldontlie games API.
+
+        :param **query_params: Keyword arguments corresponding to parameters to be used in the API call (see https://www.balldontlie.io/ for more details on parameter conventions).
+        """
+        self.__format_query_params(**query_params)
+
+        r = requests.get(games_url, params=self.params)
+
+        self.query_result = r.json()
+
+    def query_all_games(self, **query_params):
+        """
+        Stores a modified JSON object containing all of the games data from the passed query parameters (ignoring the starting page number).
+
+        :param **query_params: Keyword arguments corresponding to parameters to be used in the API call (see https://www.balldontlie.io/ for more details on parameter conventions).
+        """
+        self.__query_all_data(self.query_games, **query_params)
 
     def __update_page_request(self):
         """

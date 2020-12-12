@@ -29,6 +29,8 @@ class BallDontLieAPI(BDLToPandas):
                 self.query_all_stats(**query_params)
             elif query_type == "players":
                 self.query_all_players(**query_params)
+            elif query_type == "games":
+                self.query_all_games(**query_params)
 
     def __single_page_query(self, query_type=None, **query_params):
         """
