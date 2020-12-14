@@ -12,7 +12,7 @@ class BallDontLieAPI(BDLToPandas):
         """
         BDLToPandas.__init__(self)
 
-    def query(self, query_type=None, single_page=False, **query_params):
+    def query(self, query_type=None, single_page=False, all_seasons=True, **query_params):
         """
         Performs a query of the passed type and returns the all data retrieved from the query.
 
@@ -22,6 +22,7 @@ class BallDontLieAPI(BDLToPandas):
             - games
             - season_stats
         :param single_page: A boolean corresponding to whether or not the user would like to query only a singular page of the API rather than accessing all pages available from the specified parameters. False by default.
+        :param all_seasons: A boolean value representing whether or not all seasons should be accessed in the query. Exclusive to the "season_stats" query type.
         :param **query_params: Keyword arguments corresponding to parameters to be used in the API call (see https://www.balldontlie.io/ for more details on parameter conventions).
         """
         if single_page:
@@ -34,7 +35,14 @@ class BallDontLieAPI(BDLToPandas):
             elif query_type == "games":
                 self.query_all_games(**query_params)
             elif query_type == "season_stats":
-                self.query_all_season_stats(**query_params)
+                start_season = None
+                end_season = None
+
+                if all_seasons:
+                    start_season = FIRST_BDL_SEASON
+                    end_season = CURRENT_NBA_SEASON
+
+                self.query_all_season_stats(**query_params, start_season=start_season, end_season=end_season)
 
     def __single_page_query(self, query_type=None, **query_params):
         """
@@ -61,3 +69,43 @@ class BallDontLieAPI(BDLToPandas):
         :return: A pandas DataFrame object corresponding to the JSON data held by the most recent query.
         """
         return self.pandas_convert()
+
+    def query_players_stats(self, players=None, all_seasons=True):
+        """
+        Queries the API to get the season stats of the players within the list passed to the `players` keyword.
+
+        :param players: An array of player names. NOTE: For the most accurate results, use the full player name (e.g., enter ["Damian Lillard"] instead of ["Lillard"]).
+        :param all_seasons: A boolean value representing whether or not all seasons should be accessed in the query.
+        """
+        if players:
+            player_ids = self.__get_player_ids_from_search(players=players)
+            
+            self.query(query_type="season_stats", all_seasons=all_seasons, player_ids=player_ids)
+
+    def __get_player_ids_from_search(self, players=None):
+        """
+        Returns a list of the player IDs of the players identified in the list passed through the `players` keyword. 
+
+        :param players: An array of player names. NOTE: For the most accurate results, use the full player name (e.g., enter ["Damian Lillard"] instead of ["Lillard"]).
+        :return: A list of the player IDs of the players held within the passed list. 
+        """
+        if players:
+            player_ids = []
+
+            for player in players:
+                self.query(query_type="players", search=player)
+                player_json = self.get_json()
+                player_id = self.__get_player_id_from_json(player_json)
+
+                player_ids.append(player_id)
+
+        return player_ids
+
+    def __get_player_id_from_json(self, player_json):
+        """
+        Returns the player ID from the JSON object passed.
+
+        :param player_json: A JSON object representing a player.
+        :return: The player ID held by the JSON object passed.
+        """
+        return player_json["data"][0]["id"]

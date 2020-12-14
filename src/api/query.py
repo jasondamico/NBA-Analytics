@@ -10,6 +10,9 @@ games_url = "https://www.balldontlie.io/api/v1/games"
 season_stats_url = "https://www.balldontlie.io/api/v1/season_averages"
 array_fields = ["dates", "seasons", "player_ids", "game_ids"]
 
+FIRST_BDL_SEASON = 1979
+CURRENT_NBA_SEASON = 2020
+
 class BDLQuery():
 
     def __init__(self):
@@ -52,11 +55,12 @@ class BDLQuery():
         """
         self.__query_all_data(self.query_stats, **query_params)
 
-    def __query_all_data(self, query_func, **query_params):
+    def __query_all_data(self, query_func, reset_data=True, **query_params):
         """
         Retrieves all the data from the specified query parameters by using the passed function and stores said data.
 
-        :param func: The query function to be used to retrieve data.
+        :param query_func: The query function to be used to retrieve data.
+        :param reset_data: A boolean representing whether or not the currently held data should be replaced with the present query (if TRUE) or extended with the present query (if FALSE).
         :param **query_params: Keyword arguments corresponding to parameters to be used in the API call (see https://www.balldontlie.io/ for more details on parameter conventions).
         """
         data = []
@@ -71,7 +75,10 @@ class BDLQuery():
             query_func(**query_params)
             data.extend(self.query_result["data"])
 
-        self.data = data
+        if reset_data:
+            self.data = data
+        else:
+            self.data.extend(data)
 
     def query_players(self, **query_params):
         """
@@ -125,13 +132,21 @@ class BDLQuery():
 
         self.query_result = r.json()
 
-    def query_all_season_stats(self, **query_params):
+    def query_all_season_stats(self, start_season=None, end_season=None, **query_params):
         """
-        Stores a modified JSON object containing all of the seasons stats data from the passed query parameters (ignoring the starting page number).
+        Stores a modified JSON object containing all of the seasons stats data from the passed query parameters (ignoring the starting page number). Queries a range of seasons if a starting and ending season are specified.
 
+        :param start_season: The first season to be queried.
+        :param end_season: The final season to be queried.
         :param **query_params: Keyword arguments corresponding to parameters to be used in the API call (see https://www.balldontlie.io/ for more details on parameter conventions).
         """
-        self.__query_all_data(self.query_season_stats, **query_params)
+        if start_season and end_season:
+            self.__clear_data()
+
+            for season in range(start_season, end_season + 1):
+                self.__query_all_data(self.query_season_stats, reset_data=False, season=season, **query_params)
+        else:
+            self.__query_all_data(self.query_season_stats, **query_params)
 
     def __update_page_request(self):
         """
@@ -146,3 +161,9 @@ class BDLQuery():
         
         self.params["page"] = next_page
         return next_page
+
+    def __clear_data(self):
+        """
+        Clears the instance variable holding a modified JSON object containing data from the queries.
+        """
+        self.data = []
