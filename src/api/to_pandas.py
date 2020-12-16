@@ -47,3 +47,37 @@ class BDLToPandas(BDLQuery):
                 data[names] = col_values
 
         return pd.DataFrame(data=data)
+
+    
+    def get_player_name_map(self):
+        """
+        Returns a map of the player IDs currently held to a list holding the player's name (in the format of [last, first]).
+
+        :return: A dictionary in which the keys are all of the unique player IDs currently held by the object and each value is an array holding the name of the corresponding player ID in the format [last, first].
+        """
+        player_ids = set()
+
+        name_map = {}
+
+        for item in self.data:
+            try:
+                player_id = item["player_id"]
+                player_ids.add(player_id)
+            except KeyError:
+                pass
+
+        temp = self.data
+
+        for player_id in player_ids:
+            self.query_all_players(player_id=player_id)
+            player = self.data
+
+            player_first = player[0]["first_name"]
+            player_last = player[0]["last_name"]
+
+            name_map[player_id] = [player_last, player_first]
+
+        self.data = temp
+
+        return name_map
+
