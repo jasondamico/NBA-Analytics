@@ -23,7 +23,7 @@ class BallDontLieAPI(BDLToPandas):
             - season_stats
         :param single_page: A boolean corresponding to whether or not the user would like to query only a singular page of the API rather than accessing all pages available from the specified parameters. False by default.
         :param all_seasons: A boolean value representing whether or not all seasons should be accessed in the query. Exclusive to the "season_stats" query type.
-        :param **query_params: Keyword arguments corresponding to parameters to be used in the API call (see https://www.balldontlie.io/ for more details on parameter conventions).
+        :param **query_params: Keyword arguments corresponding to parameters to be used in the API call (see https://www.balldontlie.io/ for more details on parameter conventions). NOTE: Only entering a singular query keyword parameter of `player_id` with an integer value will get a singular player.
         """
         if single_page:
             self.__single_page_query(query_type=query_type, **query_params)

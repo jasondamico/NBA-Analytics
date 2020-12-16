@@ -15,13 +15,15 @@ CURRENT_NBA_SEASON = 2020
 
 class BDLQuery():
 
+    params = {}
+    data = []
+    query_result = []
+
     def __init__(self):
         """
-        Constructor method; creates a BallDontLieAPI object.
+        Constructor method; creates a default BDLQuery object.
         """
-        self.params = {}
-        self.data = []
-        self.query_result = []
+        pass
     
     def __format_query_params(self, **query_params):
         """
@@ -98,7 +100,17 @@ class BDLQuery():
 
         :param **query_params: Keyword arguments corresponding to parameters to be used in the API call (see https://www.balldontlie.io/ for more details on parameter conventions).
         """
-        self.__query_all_data(self.query_players, **query_params)
+        if self.is_single_player_query(**query_params):
+            self.__clear_data()
+            
+            player_id = query_params["player_id"]
+            url = players_url + f"/{player_id}"
+
+            r = requests.get(url)
+
+            self.data.append(r.json())
+        else:
+            self.__query_all_data(self.query_players, **query_params)
 
     def query_games(self, **query_params):
         """
@@ -167,3 +179,12 @@ class BDLQuery():
         Clears the instance variable holding a modified JSON object containing data from the queries.
         """
         self.data = []
+
+    def is_single_player_query(self, **query_params):
+        """
+        Returns a boolean corresponding to whether or not the passed query parameters correspond to a single player query (only a singular parameter holding a player ID).
+
+        :param **query_params: Keyword arguments corresponding to parameters to be used in the API call (see https://www.balldontlie.io/ for more details on parameter conventions).
+        :return: TRUE if the query is for a singular player, FALSE otherwise.
+        """
+        return "player_id" in query_params and len(query_params) == 1
