@@ -2,7 +2,7 @@
 A class to handle all methods related to interacting with the balldontlie API (https://www.balldontlie.io/).
 """
 
-from to_pandas import *
+from .to_pandas import *
 
 class BallDontLieAPI(BDLToPandas):
 
