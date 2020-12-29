@@ -97,20 +97,36 @@ class BallDontLieAPI(BDLToPandas):
             for player in players:
                 self.query(query_type="players", search=player)
                 player_json = self.get_json()
-                player_id = self.__get_player_id_from_json(player_json)
+                player_id = self.__get_player_id_from_json(player_json, 0)
 
                 player_ids.append(player_id)
 
         return player_ids
 
-    def __get_player_id_from_json(self, player_json):
+    def __get_player_id_from_json(self, player_json, index):
         """
-        Returns the player ID from the JSON object passed.
+        Returns the player ID at the specified index in the JSON object passed.
 
-        :param player_json: A JSON object representing a player.
-        :return: The player ID held by the JSON object passed.
+        :param player_json: A JSON object holding player objects.
+        :param index: An index in the passed JSON object that holds a player JSON object.
+        :return: The player ID held by the JSON object passed at the specified index.
         """
-        return player_json["data"][0]["id"]
+        if index not in range(0, len(player_json) - 1):
+            raise Exception("Index %d not in range of passed JSON object; acceptable range is [0, %d]" % (index, len(player_json) - 1))
+
+        return player_json["data"][index]["id"]
+
+    def __get_player_id_from_data(self, index):
+        """
+        Returns the player ID at the specified index of the data stored within the object.
+
+        :param index: An index in the stored data that holds a player JSON object.
+        :return: The player ID held by the stored data at the specified index.
+        """
+        if index not in range(0, len(self.data) - 1):
+            raise Exception("Index %d not in range of stored data; acceptable range is [0, %d]" % (index, len(self.data) - 1))
+
+        return self.data[index]["id"]
 
     def get_all_player_ids(self):
         """
@@ -123,7 +139,7 @@ class BallDontLieAPI(BDLToPandas):
         ids = []
 
         for i in range(len(self.data)):
-            ids.append(self.data[i]["id"])
+            ids.append(self.__get_player_id_from_data(i))
 
         return ids
 
