@@ -101,7 +101,7 @@ class BDLQuery():
         :param **query_params: Keyword arguments corresponding to parameters to be used in the API call (see https://www.balldontlie.io/ for more details on parameter conventions).
         """
         if self.is_single_player_query(**query_params):
-            self.__clear_data()
+            self.clear_data()
             
             player_id = query_params["player_id"]
             url = players_url + f"/{player_id}"
@@ -153,7 +153,7 @@ class BDLQuery():
         :param **query_params: Keyword arguments corresponding to parameters to be used in the API call (see https://www.balldontlie.io/ for more details on parameter conventions).
         """
         if start_season and end_season:
-            self.__clear_data()
+            self.clear_data()
 
             for season in range(start_season, end_season + 1):
                 self.__query_all_data(self.query_season_stats, reset_data=False, season=season, **query_params)
@@ -174,7 +174,7 @@ class BDLQuery():
         self.params["page"] = next_page
         return next_page
 
-    def __clear_data(self):
+    def clear_data(self):
         """
         Clears the instance variable holding a modified JSON object containing data from the queries.
         """
