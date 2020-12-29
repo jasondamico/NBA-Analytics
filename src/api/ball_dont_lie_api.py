@@ -4,6 +4,8 @@ A class to handle all methods related to interacting with the balldontlie API (h
 
 from .to_pandas import *
 
+MAX_SEASON_STATS_IDS = 400
+
 class BallDontLieAPI(BDLToPandas):
 
     def __init__(self):
@@ -109,3 +111,34 @@ class BallDontLieAPI(BDLToPandas):
         :return: The player ID held by the JSON object passed.
         """
         return player_json["data"][0]["id"]
+
+    def get_all_player_ids(self):
+        """
+        Returns all of the player IDs present in the balldontlie API.
+
+        :return: A list containing all of the player IDs (int) in the balldontlie API.
+        """
+        self.query(query_type="players")
+
+        ids = []
+
+        for i in range(len(self.data)):
+            ids.append(self.data[i]["id"])
+
+        return ids
+
+    def load_full_season_stats(self, season):
+        """
+        Loads the season averages of all of the players who played in the passed season.
+        
+        :param season: The season from which season averages will be loaded.
+        """
+        ids = self.get_all_player_ids()
+        num_players = len(ids)
+
+        self.clear_data()
+
+        # Without passing a smaller subset of the IDs list, the API returns a 414 error
+        for i in range(0, num_players, MAX_SEASON_STATS_IDS):
+            round_ids = ids[i:min(num_players + 1, i + 400)]
+            self.query_all_season_stats(player_ids=round_ids, reset_data=False, season=season)
