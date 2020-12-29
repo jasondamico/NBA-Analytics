@@ -101,7 +101,7 @@ class BDLQuery():
         :param **query_params: Keyword arguments corresponding to parameters to be used in the API call (see https://www.balldontlie.io/ for more details on parameter conventions).
         """
         if self.is_single_player_query(**query_params):
-            self.__clear_data()
+            self.clear_data()
             
             player_id = query_params["player_id"]
             url = players_url + f"/{player_id}"
@@ -144,21 +144,22 @@ class BDLQuery():
 
         self.query_result = r.json()
 
-    def query_all_season_stats(self, start_season=None, end_season=None, **query_params):
+    def query_all_season_stats(self, start_season=None, end_season=None, reset_data=False, **query_params):
         """
         Stores a modified JSON object containing all of the seasons stats data from the passed query parameters (ignoring the starting page number). Queries a range of seasons if a starting and ending season are specified.
 
         :param start_season: The first season to be queried.
         :param end_season: The final season to be queried.
+        :param reset_data: A boolean representing whether or not the currently held data should be replaced with the present query (if TRUE) or extended with the present query (if FALSE). Only used if no start/end seasons are provided.
         :param **query_params: Keyword arguments corresponding to parameters to be used in the API call (see https://www.balldontlie.io/ for more details on parameter conventions).
         """
         if start_season and end_season:
-            self.__clear_data()
+            self.clear_data()
 
             for season in range(start_season, end_season + 1):
                 self.__query_all_data(self.query_season_stats, reset_data=False, season=season, **query_params)
         else:
-            self.__query_all_data(self.query_season_stats, **query_params)
+            self.__query_all_data(self.query_season_stats, reset_data=reset_data, **query_params)
 
     def __update_page_request(self):
         """
@@ -174,7 +175,7 @@ class BDLQuery():
         self.params["page"] = next_page
         return next_page
 
-    def __clear_data(self):
+    def clear_data(self):
         """
         Clears the instance variable holding a modified JSON object containing data from the queries.
         """
