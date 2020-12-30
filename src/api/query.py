@@ -47,6 +47,8 @@ class BDLQuery():
 
         r = requests.get(stats_url, params=self.params)
 
+        self.__check_status_code(r)
+
         self.query_result = r.json()
 
     def query_all_stats(self, **query_params):
@@ -92,6 +94,8 @@ class BDLQuery():
 
         r = requests.get(players_url, params=self.params)
 
+        self.__check_status_code(r)
+
         self.query_result = r.json()
 
     def query_all_players(self, **query_params):
@@ -108,6 +112,8 @@ class BDLQuery():
 
             r = requests.get(url)
 
+            self.__check_status_code(r)
+
             self.data.append(r.json())
         else:
             self.__query_all_data(self.query_players, **query_params)
@@ -121,6 +127,8 @@ class BDLQuery():
         self.__format_query_params(**query_params)
 
         r = requests.get(games_url, params=self.params)
+
+        self.__check_status_code(r)
 
         self.query_result = r.json()
 
@@ -141,6 +149,8 @@ class BDLQuery():
         self.__format_query_params(**query_params)
 
         r = requests.get(season_stats_url, params=self.params)
+
+        self.__check_status_code(r)
 
         self.query_result = r.json()
 
@@ -189,3 +199,14 @@ class BDLQuery():
         :return: TRUE if the query is for a singular player, FALSE otherwise.
         """
         return "player_id" in query_params and len(query_params) == 1
+
+    def __check_status_code(self, response):
+        """
+        Checks to see if passed response has a valid status, throws an exception if not.
+
+        :param response: The data response returned from an API request.
+        """
+        status_code = response.status_code
+
+        if status_code not in range(200, 299):
+            raise Exception("%d Error: %s" % (status_code, response.reason))
