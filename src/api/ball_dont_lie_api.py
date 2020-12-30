@@ -111,7 +111,7 @@ class BallDontLieAPI(BDLToPandas):
         :param index: An index in the passed JSON object that holds a player JSON object.
         :return: The player ID held by the JSON object passed at the specified index.
         """
-        if index not in range(0, len(player_json) - 1):
+        if index not in range(0, len(player_json)):
             raise Exception("Index %d not in range of passed JSON object; acceptable range is [0, %d]" % (index, len(player_json) - 1))
 
         return player_json["data"][index]["id"]
@@ -123,7 +123,7 @@ class BallDontLieAPI(BDLToPandas):
         :param index: An index in the stored data that holds a player JSON object.
         :return: The player ID held by the stored data at the specified index.
         """
-        if index not in range(0, len(self.data) - 1):
+        if index not in range(0, len(self.data)):
             raise Exception("Index %d not in range of stored data; acceptable range is [0, %d]" % (index, len(self.data) - 1))
 
         return self.data[index]["id"]
