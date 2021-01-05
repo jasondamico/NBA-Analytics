@@ -72,17 +72,35 @@ class BDLQuery():
         self.params["page"] = 1
         self.params["per_page"] = 100
 
-        query_func(**query_params)
+        while not self.try_query(query_func, **query_params):
+            pass
+
         data.extend(self.query_result["data"])
 
         while(self.__update_page_request()):
-            query_func(**query_params)
+            while not self.try_query(query_func, **query_params):
+                pass
+
             data.extend(self.query_result["data"])
 
         if reset_data:
             self.data = data
         else:
             self.data.extend(data)
+
+    def try_query(self, query_func, **query_params):
+        """
+        Attempts a query performed by the passed function with the passed parameters, waiting until more requests may be made if a TooManyRequests exception is raised.
+
+        :param query_func: The query function to be used to retrieve data.
+        :param **query_params: Keyword arguments corresponding to parameters to be used in the API call (see https://www.balldontlie.io/ for more details on parameter conventions).
+        :return: TRUE if the query was performed successfully, FALSE otherwise.
+        """
+        try:
+            query_func(**query_params)
+            return True
+        except TooManyRequests:
+            return False
 
     def query_players(self, **query_params):
         """
