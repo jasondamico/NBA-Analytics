@@ -47,7 +47,7 @@ class BDLQuery():
 
         r = requests.get(stats_url, params=self.params)
 
-        self.__check_status_code(r)
+        self.__process_response(r)
 
         self.query_result = r.json()
 
@@ -94,7 +94,7 @@ class BDLQuery():
 
         r = requests.get(players_url, params=self.params)
 
-        self.__check_status_code(r)
+        self.__process_response(r)
 
         self.query_result = r.json()
 
@@ -112,7 +112,7 @@ class BDLQuery():
 
             r = requests.get(url)
 
-            self.__check_status_code(r)
+            self.__process_response(r)
 
             self.data.append(r.json())
         else:
@@ -128,7 +128,7 @@ class BDLQuery():
 
         r = requests.get(games_url, params=self.params)
 
-        self.__check_status_code(r)
+        self.__process_response(r)
 
         self.query_result = r.json()
 
@@ -150,7 +150,7 @@ class BDLQuery():
 
         r = requests.get(season_stats_url, params=self.params)
 
-        self.__check_status_code(r)
+        self.__process_response(r)
 
         self.query_result = r.json()
 
@@ -200,9 +200,20 @@ class BDLQuery():
         """
         return "player_id" in query_params and len(query_params) == 1
 
+    def __process_response(self, response):
+        """
+        Performs functions relating to processing the passed response (checks to see if passed response has a valid status).
+
+        :param response: The data response returned from an API request.
+        """
+        self.__check_status_code(response)
+
+        if not self.first_query_datetime or self.get_bdl_refresh_delta() < 0:
+            self.__set_first_query_datetime(datetime.datetime.now())
+
     def __check_status_code(self, response):
         """
-        Checks to see if passed response has a valid status, throws an exception if not.
+        Checks to see if passed response has a valid status code, raises an exception if not.
 
         :param response: The data response returned from an API request.
         """
