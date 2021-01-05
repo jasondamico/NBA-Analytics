@@ -208,9 +208,6 @@ class BDLQuery():
         """
         self.__check_status_code(response)
 
-        if not self.first_query_datetime or self.get_bdl_refresh_delta() < 0:
-            self.__set_first_query_datetime(datetime.datetime.now())
-
     def __check_status_code(self, response):
         """
         Checks to see if passed response has a valid status code, raises an exception if not.
