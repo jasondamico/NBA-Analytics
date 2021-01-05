@@ -49,33 +49,47 @@ class BDLToPandas(BDLQuery):
         return pd.DataFrame(data=data)
 
     
-    def get_player_name_map(self):
+    def get_player_name_map(self, using_stored_data=False):
         """
         Returns a map of the player IDs currently held to a list holding the player's name (in the format of [last, first]).
 
-        :return: A dictionary in which the keys are all of the unique player IDs currently held by the object and each value is an array holding the name of the corresponding player ID in the format [last, first].
+        :param using_stored: A boolean indicating if the returned map should be a map of the players stored (when value is TRUE), or a map of all players available in the database (when value is FALSE).
+        :return: A dictionary in which the keys are all unique player IDs and each value is an array holding the name of the corresponding player ID in the format [last, first].
         """
-        player_ids = set()
-
         name_map = {}
 
-        for item in self.data:
-            try:
-                player_id = item["player_id"]
-                player_ids.add(player_id)
-            except KeyError:
-                pass
-
         temp = self.data
+        
+        if not using_stored_data:
+            # creates a map using all player IDs in the database
+            self.query_all_players()
 
-        for player_id in player_ids:
-            self.query_all_players(player_id=player_id)
-            player = self.data
+            for player in self.data:
+                player_id = player["id"]
 
-            player_first = player[0]["first_name"]
-            player_last = player[0]["last_name"]
+                player_first = player["first_name"]
+                player_last = player["last_name"]
 
-            name_map[player_id] = [player_last, player_first]
+                name_map[player_id] = [player_last, player_first]
+        else:
+            # creates a map using only the stored player IDs
+            player_ids = set()
+
+            for item in self.data:
+                try:
+                    player_id = item["player_id"]
+                    player_ids.add(player_id)
+                except KeyError:    # if item does not have a player_id key and, therefore, is not a player
+                    pass
+
+            for player_id in player_ids:
+                self.query_all_players(player_id=player_id)
+                player = self.data
+
+                player_first = player[0]["first_name"]
+                player_last = player[0]["last_name"]
+
+                name_map[player_id] = [player_last, player_first]
 
         self.data = temp
 
