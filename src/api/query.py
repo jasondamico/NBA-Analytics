@@ -220,4 +220,13 @@ class BDLQuery():
         status_code = response.status_code
 
         if status_code not in range(200, 299):
-            raise Exception("%d Error: %s" % (status_code, response.reason))
+            if status_code == 429:  # too many requests error
+                raise TooManyRequests("Too many requests made to the balldontlie API")
+            else:
+                raise Exception("%d Error: %s" % (status_code, response.reason))
+
+class TooManyRequests(Exception):
+    """
+    An exception to be raised when too many requests are made to the balldontlie API (resulting in a 429 error).
+    """
+    pass
