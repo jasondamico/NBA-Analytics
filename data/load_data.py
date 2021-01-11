@@ -37,14 +37,23 @@ def download_mvp_stats():
 
         complete_name = os.path.join(csv_dir, name)
 
-        bdl.load_full_season_stats(season)
-        df = bdl.get_pandas_df()
+        if not csv_exists(complete_name):
+            bdl.load_full_season_stats(season)
+            df = bdl.get_pandas_df()
 
-        merged = pd.merge(map_df, df, how="right", left_index=True, right_on="player_id")
-
-        merged.to_csv(complete_name)
+            merged = pd.merge(map_df, df, how="right", left_index=True, right_on="player_id")
+            merged.to_csv(complete_name)
 
     print("Completed load MVP stats.")
+
+def csv_exists(csv_name):
+    """
+    Returns a boolean corresponding to whether or not a CSV file of the passed name has already been created.
+
+    :param csv_name: The name of a CSV that will be checked for existence.
+    :return: TRUE if a CSV file of the passed name exists, FALSE otherwise.
+    """
+    return os.path.isfile(csv_name)
 
 def check_dir(dir_path):
     """
