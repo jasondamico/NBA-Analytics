@@ -17,3 +17,38 @@ BDL = ball_dont_lie_api.BallDontLieAPI()
 CURRENT_SEASON = 2020
 FIRST_SEASON = 2000
 
+def download_mvp_stats():
+    """
+    Loads all of the data needed for MVP analysis.
+    """
+    print("Beginning load MVP stats...")
+
+    bdl = ball_dont_lie_api.BallDontLieAPI()
+
+    player_map = bdl.get_player_name_map()
+    map_df = pd.DataFrame.from_dict(player_map, orient="index", columns=["last_name", "first_name"])
+
+    for season in range(FIRST_SEASON, CURRENT_SEASON + 1):
+        name = str(season) + "_stats.csv"
+
+        csv_dir = os.path.join(currentdir, "season_averages")
+
+        check_dir(csv_dir)
+
+        complete_name = os.path.join(csv_dir, name)
+
+        bdl.load_full_season_stats(season)
+        df = bdl.get_pandas_df()
+
+        merged = pd.merge(map_df, df, how="right", left_index=True, right_on="player_id")
+
+        merged.to_csv(complete_name)
+
+    print("Completed load MVP stats.")
+
+def check_dir(dir_path):
+    """
+    Checks to see if the passed directory path exists, creates it if not.
+    """
+    if not os.path.exists(dir_path):
+        os.makedirs(dir_path)
