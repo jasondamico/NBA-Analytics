@@ -10,11 +10,13 @@ RELEVANT_COL_NAMES = ["player", "votes_first", "points_won", "points_max", "awar
 
 def get_mvp_voting_map(season):
     """
-    Returns a list of maps of all the players that received MVP votes for the passed season. 
+    Returns a list of maps of all the players that received MVP votes for the passed season. NOTE: Season 2000 is the 1999-2000 season for basketball-reference, whereas season 2000 is 2000-2001 for balldontlie.
 
     :param season: The season from which a list of player voting maps will be returned.
     :return: A list of voting maps, where each element in the list is a map of how a given player received votes for the passed season.
     """
+    season = convert_bdl_season_to_bball_ref(season)
+
     url = BASE_URL + f"awards_{season}.html#mvp"
 
     page = requests.get(url)
@@ -38,6 +40,15 @@ def get_mvp_voting_map(season):
         players_map.append(val_map)
 
     return players_map
+
+def convert_bdl_season_to_bball_ref(season):
+    """
+    Considering that a year corresponding to a season means different things to the balldontlie and the basketball-reference website, returns the passed season integer to the integer that would access the same season on basketball-reference.com as is being used in the balldontlie API.
+
+    :param season: An integer used to retrieve an NBA season from the balldontlie API.
+    :return: The integer used to receive the same NBA season from the basketball-reference website as the one that was retrieved from the balldontlie API.
+    """
+    return season + 1
 
 def get_players_list(tds):
     """
