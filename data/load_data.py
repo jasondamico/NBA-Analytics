@@ -10,7 +10,7 @@ currentdir = os.path.dirname(os.path.realpath(__file__))
 parentdir = os.path.dirname(currentdir)
 sys.path.append(parentdir)
 
-from src.api import ball_dont_lie_api
+from api import ball_dont_lie_api
 
 BDL = ball_dont_lie_api.BallDontLieAPI()
 
