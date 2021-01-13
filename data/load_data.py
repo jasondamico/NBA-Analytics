@@ -11,6 +11,7 @@ parentdir = os.path.dirname(currentdir)
 sys.path.append(parentdir)
 
 from api import ball_dont_lie_api
+import mvp_votes.scraping.scraping_bball_ref as scraping_bball_ref
 
 BDL = ball_dont_lie_api.BallDontLieAPI()
 
@@ -42,6 +43,8 @@ def download_mvp_stats():
             df = bdl.get_pandas_df()
 
             merged = pd.merge(map_df, df, how="right", left_index=True, right_on="player_id")
+            merged = get_appended_votes_df(merged, season)
+
             merged.to_csv(complete_name)
 
     print("Completed load MVP stats.")
@@ -58,6 +61,27 @@ def csv_exists(csv_name):
 def check_dir(dir_path):
     """
     Checks to see if the passed directory path exists, creates it if not.
+
+    :param dir_path: A directory path that will be created if it does not already exist.
     """
     if not os.path.exists(dir_path):
         os.makedirs(dir_path)
+
+def get_appended_votes_df(stats_df, season):
+    """
+    Returns a DataFrame object identical to the one passed as an argument, but with the MVP voting stats from the passed season appended to the listed.
+
+    :param stats_df: A DataFrame object containing NBA season average statistics.
+    :param season: An integer value representing the season from which MVP voting should be retrieved. For instance, an inputted season value of 2019 returns the voting record from the 2019-2020 season. 
+    :return: An identical DataFrame object to the one passed, but with MVP voting stats for the passed season appended.
+    """
+    voting_maps_list = scraping_bball_ref.get_mvp_voting_map(season)
+    voting_maps_df = pd.DataFrame(voting_maps_list)
+
+    stats_df["full_name"] = stats_df["first_name"] + " " + stats_df["last_name"]
+
+    df_with_votes = pd.merge(stats_df, voting_maps_df, how="left", left_on="full_name", right_on="player")
+
+    df_with_votes.loc[:, ["votes_first", "points_won", "points_max", "award_share"]] = df_with_votes.loc[:, ["votes_first", "points_won", "points_max", "award_share"]].fillna(value=0)
+
+    return df_with_votes
