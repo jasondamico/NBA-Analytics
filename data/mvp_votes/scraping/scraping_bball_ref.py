@@ -21,6 +21,8 @@ def get_mvp_voting_map(season):
 
     page = requests.get(url)
 
+    check_status_code(page, season)
+
     soup = BeautifulSoup(page.content, 'html.parser')
 
     mvp_table = soup.find(id='mvp')
@@ -78,4 +80,18 @@ def is_relevant_voting_col(col_name):
     :return: TRUE if the passed column name corresponds to data that is relevant for collection, FALSE otherwise.
     """
     return col_name in RELEVANT_COL_NAMES
+
+def check_status_code(response, season):
+    """
+    Checks to see if the response returned a valid status code, raising an error if not.
+
+    :param response: The response returned from a get request.
+    :param season: The season being retrieved through the response.
+    """
+    if response.status_code in range (400, 499):
+        if response.status_code == 404:
+            raise Exception("404 Error: Page not found. Please check to see if there is MVP voting available for the %d season." % (season))
+        else:
+            exception_message = "%d Error: %s" % (response.status_code, response.reason)
+            raise Exception(exception_message)
 
