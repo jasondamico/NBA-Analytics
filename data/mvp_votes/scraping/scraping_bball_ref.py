@@ -26,7 +26,19 @@ def get_mvp_voting_map(season):
 
     players_list = get_players_list(tds)
 
-    return
+    players_map = []
+
+    for player in players_list:
+        val_map = dict()
+
+        for value in player:
+            data_stat_val = value.get("data-stat")
+            val_map[data_stat_val] = value.get_text()
+
+        players_map.append(val_map)
+
+    return players_map
+
 def get_players_list(tds):
     """
     Parses through the passed td tags and returns a list where each element contains a collection of td tags related to the MVP voting stats of a player.
