@@ -83,7 +83,7 @@ def get_appended_votes_df(stats_df, season):
 
     df_with_votes = pd.merge(stats_df, voting_maps_df, how="left", left_on="full_name", right_on="player")
 
-    df_with_votes.loc[:, ["votes_first", "points_won", "points_max", "award_share"]] = df_with_votes.loc[:, ["votes_first", "points_won", "points_max", "award_share"]].fillna(value=0)
+    df_with_votes.loc[:, scraping_bball_ref.RELEVANT_COL_NAMES] = df_with_votes.loc[:, scraping_bball_ref.RELEVANT_COL_NAMES].fillna(value=0)
 
     return df_with_votes
 
