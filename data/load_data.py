@@ -44,8 +44,9 @@ def download_mvp_stats():
 
             merged = pd.merge(map_df, df, how="right", left_index=True, right_on="player_id")
             merged = get_appended_votes_df(merged, season)
+            drop_duplicate_cols(merged)
 
-            merged.to_csv(complete_name)
+            merged.to_csv(complete_name, index=False)
 
     print("Completed load MVP stats.")
 
@@ -85,3 +86,11 @@ def get_appended_votes_df(stats_df, season):
     df_with_votes.loc[:, ["votes_first", "points_won", "points_max", "award_share"]] = df_with_votes.loc[:, ["votes_first", "points_won", "points_max", "award_share"]].fillna(value=0)
 
     return df_with_votes
+
+def drop_duplicate_cols(stats_df):
+    """
+    Drops all columns in the passed DataFrame that were duplicate and/or created in order to properly assemble the DataFrame, but are no longer needed.
+
+    :param stats_df: A DataFrame object containing NBA season average statistics.
+    """
+    stats_df.drop(["full_name", "player"], axis=1, inplace=True)
