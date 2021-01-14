@@ -43,7 +43,13 @@ def download_mvp_stats():
             df = bdl.get_pandas_df()
 
             merged = pd.merge(map_df, df, how="right", left_index=True, right_on="player_id")
-            merged = get_appended_votes_df(merged, season)
+           
+            if season != CURRENT_SEASON:
+                merged = get_appended_votes_df(merged, season)
+            else:
+                # In absence of appending MVP votes, the same columns are filled with NaN for the current season
+                merged.loc[:, scraping_bball_ref.RELEVANT_COL_NAMES] = float("NaN")
+
             drop_duplicate_cols(merged)
 
             merged.to_csv(complete_name, index=False)
@@ -93,4 +99,7 @@ def drop_duplicate_cols(stats_df):
 
     :param stats_df: A DataFrame object containing NBA season average statistics.
     """
-    stats_df.drop(["full_name", "player"], axis=1, inplace=True)
+    # Uses set's intersection method to only drop the columns present in the stats_df columns (thus avoiding  an error relating to trying to drop a column that doesn't exist)
+    intersection_list = list(set(stats_df.columns).intersection(["full_name", "player"]))
+
+    stats_df.drop(intersection_list, axis=1, inplace=True)
