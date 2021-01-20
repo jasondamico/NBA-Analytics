@@ -102,5 +102,11 @@ class BDLToPandas(BDLQuery):
         """
         Performs a variety of methods to prepare the held pandas dataframe for analysis by properly formatting the existing data.
         """
-        pass
+        self.__convert_min()
 
+    def __convert_min(self):
+        """
+        Converts the `min` column from minutes/seconds to minutes and decimals of minutes.
+        """
+        self.pandas_df["min"] = self.pandas_df["min"].str.replace(':','.').astype(float)    # Converts column to float; column previously held strings
+        self.pandas_df["min"] = self.pandas_df["min"].astype(int) + (((self.pandas_df.loc[:, "min"] - self.pandas_df.loc[:, "min"].astype(int)) * 100).round(0).astype(int) / 60).round(2)        
