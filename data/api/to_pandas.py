@@ -46,7 +46,10 @@ class BDLToPandas(BDLQuery):
             
                 data[names] = col_values
 
-        return pd.DataFrame(data=data)
+        self.pandas_df = pd.DataFrame(data=data)
+        self.__clean_df()
+
+        return self.pandas_df
 
     
     def get_player_name_map(self, using_stored_data=False):
@@ -94,4 +97,10 @@ class BDLToPandas(BDLQuery):
         self.data = temp
 
         return name_map
+
+    def __clean_df(self):
+        """
+        Performs a variety of methods to prepare the held pandas dataframe for analysis by properly formatting the existing data.
+        """
+        pass
 
