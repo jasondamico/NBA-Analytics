@@ -26,8 +26,8 @@ def download_mvp_stats():
 
     bdl = ball_dont_lie_api.BallDontLieAPI()
 
-    player_map = bdl.get_player_name_map()
-    map_df = pd.DataFrame.from_dict(player_map, orient="index", columns=["last_name", "first_name"])
+    player_map = None
+    map_df = None
 
     for season in range(FIRST_SEASON, CURRENT_SEASON + 1):
         name = str(season) + "_stats.csv"
@@ -39,6 +39,11 @@ def download_mvp_stats():
         complete_name = os.path.join(csv_dir, name)
 
         if not csv_exists(complete_name):
+            # loads player_map, converts to a df if that has not been done yet
+            if not player_map and not map_df:
+                player_map = bdl.get_player_name_map()
+                map_df = pd.DataFrame.from_dict(player_map, orient="index", columns=["last_name", "first_name"])
+
             bdl.load_full_season_stats(season)
             df = bdl.get_pandas_df()
 
