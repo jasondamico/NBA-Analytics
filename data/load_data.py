@@ -11,7 +11,7 @@ parentdir = os.path.dirname(currentdir)
 sys.path.append(parentdir)
 
 from api import ball_dont_lie_api
-import scraping.bball_ref_mvp_votes as bball_ref_mvp_votes
+import scraping.basketball_reference.mvp_votes as mvp_votes
 
 BDL = ball_dont_lie_api.BallDontLieAPI()
 
@@ -53,7 +53,7 @@ def download_mvp_stats():
                 merged = get_appended_votes_df(merged, season)
             else:
                 # In absence of appending MVP votes, the same columns are filled with NaN for the current season
-                merged.loc[:, bball_ref_mvp_votes.RELEVANT_COL_NAMES] = float("NaN")
+                merged.loc[:, mvp_votes.RELEVANT_COL_NAMES] = float("NaN")
 
             drop_duplicate_cols(merged)
 
@@ -87,14 +87,14 @@ def get_appended_votes_df(stats_df, season):
     :param season: An integer value representing the season from which MVP voting should be retrieved. For instance, an inputted season value of 2019 returns the voting record from the 2019-2020 season. 
     :return: An identical DataFrame object to the one passed, but with MVP voting stats for the passed season appended.
     """
-    voting_maps_list = bball_ref_mvp_votes.get_mvp_voting_map(season)
+    voting_maps_list = mvp_votes.get_mvp_voting_map(season)
     voting_maps_df = pd.DataFrame(voting_maps_list)
 
     stats_df["full_name"] = stats_df["first_name"] + " " + stats_df["last_name"]
 
     df_with_votes = pd.merge(stats_df, voting_maps_df, how="left", left_on="full_name", right_on="player")
 
-    df_with_votes.loc[:, bball_ref_mvp_votes.RELEVANT_COL_NAMES] = df_with_votes.loc[:, bball_ref_mvp_votes.RELEVANT_COL_NAMES].fillna(value=0)
+    df_with_votes.loc[:, mvp_votes.RELEVANT_COL_NAMES] = df_with_votes.loc[:, mvp_votes.RELEVANT_COL_NAMES].fillna(value=0)
 
     return df_with_votes
 
