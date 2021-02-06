@@ -28,20 +28,15 @@ def get_player_team_map(season):
 
     player_team_map = {}
     most_played_team = None
+    multiple_team_player = None
 
     for tr in trs:
         team = tr.find_all("td", {"data-stat":"team_id"})[0].get_text()
         name = tr.find_all("td", {"data-stat":"player"})[0].get_text()
 
         # Handling of players who played for multiple teams in the passed season.
-        # NOTE: If a player played for more than one team in the passed season, the team he played the most amount of games for is used in the map.
-        if team == "TOT":
-            multiple_team_player = name
-            most_played_team = {
-                "team": None,
-                "games_played": 0
-            }
-        elif isinstance(most_played_team, dict):    # i.e., if there is still a player who hasn't been added to the map
+        # NOTE: If a player played for more than one team in the passed season, the team he played the most amount of games for is used in the map.        
+        if isinstance(most_played_team, dict):    # i.e., if there is still a player who hasn't been added to the map
             games_played = int(tr.find_all("td", {"data-stat": "g"})[0].get_text())
 
             if name == multiple_team_player:    # i.e., the player in this loop is the same one that is being handled due to playing for multiple teams
@@ -49,10 +44,18 @@ def get_player_team_map(season):
                     most_played_team["team"] = team
                     most_played_team["games_played"] = games_played
             else:
-                print(multiple_team_player, most_played_team)
                 player_team_map[multiple_team_player] = most_played_team["team"]
                 most_played_team = None
-        else:
+                multiple_team_player = None
+        
+        # Initializes multiple team handling sequence
+        if team == "TOT":
+            multiple_team_player = name
+            most_played_team = {
+                "team": None,
+                "games_played": 0
+            }
+        elif not most_played_team:
             player_team_map[name] = team
 
     return player_team_map
