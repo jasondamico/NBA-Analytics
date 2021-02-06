@@ -58,4 +58,7 @@ def get_player_team_map(season):
         elif not most_played_team:
             player_team_map[name] = team
 
+    if most_played_team:
+        player_team_map[multiple_team_player] = most_played_team["team"]
+
     return player_team_map
