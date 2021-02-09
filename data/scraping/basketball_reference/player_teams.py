@@ -3,6 +3,7 @@ Retrieves the team a group of players played on in a specified season according 
 """
 
 from bball_ref_utils import *
+from team_abbreviation_dict import team_abbreviation_dict
 
 BASE_URL = "https://www.basketball-reference.com/leagues/"
 
@@ -41,7 +42,7 @@ def get_player_team_map(season):
 
             if name == multiple_team_player:    # i.e., the player in this loop is the same one that is being handled due to playing for multiple teams
                 if games_played > most_played_team["games_played"]:
-                    most_played_team["team"] = team
+                    most_played_team["team"] = team_abbreviation_dict[team]
                     most_played_team["games_played"] = games_played
             else:
                 player_team_map[multiple_team_player] = most_played_team["team"]
@@ -56,7 +57,7 @@ def get_player_team_map(season):
                 "games_played": 0
             }
         elif not most_played_team:
-            player_team_map[name] = team
+            player_team_map[name] = team_abbreviation_dict[team]
 
     if most_played_team:
         player_team_map[multiple_team_player] = most_played_team["team"]
