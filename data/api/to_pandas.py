@@ -54,10 +54,10 @@ class BDLToPandas(BDLQuery):
     
     def get_player_name_map(self, using_stored_data=False):
         """
-        Returns a map of the player IDs currently held to a list holding the player's name (in the format of last, first) and team name.
+        Returns a map of the player IDs currently held to a list holding the player's name (in the format of [last, first]).
 
         :param using_stored: A boolean indicating if the returned map should be a map of the players stored (when value is TRUE), or a map of all players available in the database (when value is FALSE).
-        :return: A dictionary in which the keys are all unique player IDs and each value is an array holding the name and team name of the corresponding player ID in the format [last, first, team_name].
+        :return: A dictionary in which the keys are all unique player IDs and each value is an array holding the name of the corresponding player ID in the format [last, first].
         """
         name_map = {}
 
@@ -69,12 +69,11 @@ class BDLToPandas(BDLQuery):
 
             for player in self.data:
                 player_id = player["id"]
-                team_name = player["team"]["full_name"]
 
                 player_first = player["first_name"]
                 player_last = player["last_name"]
 
-                name_map[player_id] = [player_last, player_first, team_name]
+                name_map[player_id] = [player_last, player_first]
         else:
             # creates a map using only the stored player IDs
             player_ids = set()
