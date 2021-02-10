@@ -30,36 +30,54 @@ def get_player_team_map(season):
     player_team_map = {}
     most_played_team = None
     multiple_team_player = None
+    multiple_team_player_id = None
 
     for tr in trs:
         team = tr.find_all("td", {"data-stat":"team_id"})[0].get_text()
-        name = tr.find_all("td", {"data-stat":"player"})[0].get_text()
+        player_id = tr.find_all("th", {"data-stat":"ranker"})[0].get_text()
+        name = tr.find_all("td", {"data-stat":"player"})[0].get("csk").split(",")
+        first = name[1]
+        last = name[0]
 
         # Handling of players who played for multiple teams in the passed season.
         # NOTE: If a player played for more than one team in the passed season, the team he played the most amount of games for is used in the map.        
-        if isinstance(most_played_team, dict):    # i.e., if there is still a player who hasn't been added to the map
+        if multiple_team_player:    # i.e., if there is still a player who hasn't been added to the map
             games_played = int(tr.find_all("td", {"data-stat": "g"})[0].get_text())
 
-            if name == multiple_team_player:    # i.e., the player in this loop is the same one that is being handled due to playing for multiple teams
+            if player_id == multiple_team_player_id:    # i.e., the player in this loop is the same one that is being handled due to playing for multiple teams
                 if games_played > most_played_team["games_played"]:
                     most_played_team["team"] = team_abbreviation_dict[team]
                     most_played_team["games_played"] = games_played
-            else:
-                player_team_map[multiple_team_player] = most_played_team["team"]
+            else:   # stores multi-team player, as the player belonging to this loop of the trs is no longer the multi-team player
+                player_team_map[multiple_team_player_id] = {
+                    "team": most_played_team["team"],
+                    "last": multiple_team_player["first"],
+                    "first": multiple_team_player["last"]
+                }
+
                 most_played_team = None
                 multiple_team_player = None
+                multiple_team_player_id = None
         
-        # Initializes multiple team handling sequence
-        if team == "TOT":
-            multiple_team_player = name
+        if team == "TOT":   # Initializes multiple team handling sequence
+            multiple_team_player_id = player_id
+            multiple_team_player = {"first": first, "last": last}
             most_played_team = {
                 "team": None,
                 "games_played": 0
             }
-        elif not most_played_team:
-            player_team_map[name] = team_abbreviation_dict[team]
+        elif not most_played_team:   # i.e., this loop contains a player that only played for a singular team
+            player_team_map[player_id] = {
+                "team": team_abbreviation_dict[team],
+                "last": last,
+                "first": first
+            }
 
-    if most_played_team:
-        player_team_map[multiple_team_player] = most_played_team["team"]
+    if most_played_team:    # checks to see if the final player in the table was one who played for multiple teams
+        player_team_map[multiple_team_player_id] = {
+            "team": most_played_team["team"],
+            "last": last,
+            "first": first
+        }
 
     return player_team_map
