@@ -51,8 +51,8 @@ def get_player_team_map(season):
             else:   # stores multi-team player, as the player belonging to this loop of the trs is no longer the multi-team player
                 player_team_map[multiple_team_player_id] = {
                     "team": most_played_team["team"],
-                    "last": multiple_team_player["first"],
-                    "first": multiple_team_player["last"]
+                    "last": multiple_team_player["last"],
+                    "first": multiple_team_player["first"]
                 }
 
                 most_played_team = None
