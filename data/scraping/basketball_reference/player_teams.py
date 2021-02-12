@@ -35,7 +35,7 @@ def get_player_team_map(season):
     for tr in trs:
         team = tr.find_all("td", {"data-stat":"team_id"})[0].get_text()
         player_id = tr.find_all("th", {"data-stat":"ranker"})[0].get_text()
-        full_name = unidecode(tr.find_all("td", {"data-stat":"player"})[0].get_text())
+        full_name = unidecode(tr.find_all("td", {"data-stat":"player"})[0].get_text()).replace(".", "")
 
         # Handling of players who played for multiple teams in the passed season.
         # NOTE: If a player played for more than one team in the passed season, the team he played the most amount of games for is used in the map.        

@@ -70,8 +70,8 @@ class BDLToPandas(BDLQuery):
             for player in self.data:
                 player_id = player["id"]
 
-                player_first = player["first_name"]
-                player_last = player["last_name"]
+                player_first = player["first_name"].replace(".", "")
+                player_last = player["last_name"].replace(".", "")
 
                 name_map[player_id] = [player_last, player_first]
         else:
