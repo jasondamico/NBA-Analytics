@@ -35,9 +35,7 @@ def get_player_team_map(season):
     for tr in trs:
         team = tr.find_all("td", {"data-stat":"team_id"})[0].get_text()
         player_id = tr.find_all("th", {"data-stat":"ranker"})[0].get_text()
-        name = tr.find_all("td", {"data-stat":"player"})[0].get("csk").split(",")
-        first = name[1]
-        last = name[0]
+        full_name = unidecode(tr.find_all("td", {"data-stat":"player"})[0].get_text())
 
         # Handling of players who played for multiple teams in the passed season.
         # NOTE: If a player played for more than one team in the passed season, the team he played the most amount of games for is used in the map.        
@@ -51,8 +49,7 @@ def get_player_team_map(season):
             else:   # stores multi-team player, as the player belonging to this loop of the trs is no longer the multi-team player
                 player_team_map[multiple_team_player_id] = {
                     "team": most_played_team["team"],
-                    "last": multiple_team_player["last"],
-                    "first": multiple_team_player["first"]
+                    "full_name": multiple_team_player["full_name"],
                 }
 
                 most_played_team = None
@@ -61,7 +58,7 @@ def get_player_team_map(season):
         
         if team == "TOT":   # Initializes multiple team handling sequence
             multiple_team_player_id = player_id
-            multiple_team_player = {"first": first, "last": last}
+            multiple_team_player = {"full_name": full_name}
             most_played_team = {
                 "team": None,
                 "games_played": 0
@@ -69,15 +66,13 @@ def get_player_team_map(season):
         elif not most_played_team:   # i.e., this loop contains a player that only played for a singular team
             player_team_map[player_id] = {
                 "team": team_abbreviation_dict[team],
-                "last": last,
-                "first": first
+                "full_name": full_name
             }
 
     if most_played_team:    # checks to see if the final player in the table was one who played for multiple teams
         player_team_map[multiple_team_player_id] = {
             "team": most_played_team["team"],
-            "last": last,
-            "first": first
+            "full_name": full_name
         }
 
     return player_team_map
