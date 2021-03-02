@@ -2,6 +2,7 @@
 Retrieves the team a group of players played on in a specified season according to basketball-reference.com
 """
 
+from unidecode import unidecode
 from bball_ref_utils import *
 from team_abbreviation_dict import team_abbreviation_dict
 
