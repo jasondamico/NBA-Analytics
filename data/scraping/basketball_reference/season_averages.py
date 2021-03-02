@@ -28,6 +28,9 @@ def get_player_team_map(season):
     table = soup.find(id="per_game_stats")
     trs = table.find_all("tr", {"class":["full_table", "partial_table"]})
 
+    return get_rows_dict(trs)
+
+def get_rows_dict(trs):
     player_team_map = {}
     most_played_team = None
     multiple_team_player = None
