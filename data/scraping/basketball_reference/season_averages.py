@@ -2,7 +2,6 @@
 Retrieves the team a group of players played on in a specified season according to basketball-reference.com
 """
 
-from unidecode import unidecode
 from bball_ref_utils import *
 from team_abbreviation_dict import team_abbreviation_dict
 
@@ -31,52 +30,34 @@ def get_player_team_map(season):
     return get_rows_dict(trs)
 
 def get_rows_dict(trs):
-    player_team_map = {}
-    most_played_team = None
-    multiple_team_player = None
-    multiple_team_player_id = None
+    players = []
+    player = {}
 
-    for tr in trs:
-        team = tr.find_all("td", {"data-stat":"team_id"})[0].get_text()
-        player_id = tr.find_all("th", {"data-stat":"ranker"})[0].get_text()
-        full_name = unidecode(tr.find_all("td", {"data-stat":"player"})[0].get_text()).replace(".", "")
+    for i in range(len(trs)):
+        tr = trs[i]
 
-        # Handling of players who played for multiple teams in the passed season.
-        # NOTE: If a player played for more than one team in the passed season, the team he played the most amount of games for is used in the map.        
-        if multiple_team_player:    # i.e., if there is still a player who hasn't been added to the map
-            games_played = int(tr.find_all("td", {"data-stat": "g"})[0].get_text())
+        player_id = tr.find_all("td", {"data-stat":"player"})[0].get("data-append-csv")
 
-            if player_id == multiple_team_player_id:    # i.e., the player in this loop is the same one that is being handled due to playing for multiple teams
-                if games_played > most_played_team["games_played"]:
-                    most_played_team["team"] = team_abbreviation_dict[team]
-                    most_played_team["games_played"] = games_played
-            else:   # stores multi-team player, as the player belonging to this loop of the trs is no longer the multi-team player
-                player_team_map[multiple_team_player_id] = {
-                    "team": most_played_team["team"],
-                    "full_name": multiple_team_player["full_name"],
-                }
+        if not bool(player) or player_id != player["id"]:   # i.e., if this isn't the first loop or the player id from this row is different than the previous row
+            players.append(player)  # This row is a different player than the previous row, meaning that the previous row may be stored
+            player = {}        
 
-                most_played_team = None
-                multiple_team_player = None
-                multiple_team_player_id = None
-        
-        if team == "TOT":   # Initializes multiple team handling sequence
-            multiple_team_player_id = player_id
-            multiple_team_player = {"full_name": full_name}
-            most_played_team = {
-                "team": None,
-                "games_played": 0
-            }
-        elif not most_played_team:   # i.e., this loop contains a player that only played for a singular team
-            player_team_map[player_id] = {
-                "team": team_abbreviation_dict[team],
-                "full_name": full_name
-            }
+            for td in tr.find_all("td"):    # Scrapes and stores data related to the player in this row
+                data_type = td.get("data-stat")
+                if data_type == "player":
+                    player["id"] = td.get("data-append-csv")    # A unique identifier used by basketball-reference.com
+                
+                player[data_type] = td.get_text()
 
-    if most_played_team:    # checks to see if the final player in the table was one who played for multiple teams
-        player_team_map[multiple_team_player_id] = {
-            "team": most_played_team["team"],
-            "full_name": full_name
-        }
+            player["multi_team_player"] = 0
+        else:   # Initializes multiple team handling sequence
+            player["multi_team_player"] = 1
+            stored_team_games = int(player["g"])
+            current_row_games_played = int(tr.find_all("td", {"data-stat":"g"})[0].get_text())
 
-    return player_team_map
+            if player["team_id"] == "TOT" or current_row_games_played > stored_team_games:      # NOTE: The statistics of the player stored are their total season stats, but the team stored is the team they played the most games for
+                current_row_team = tr.find_all("td", {"data-stat":"team_id"})[0].get_text()
+                player["g"] = current_row_games_played
+                player["team_id"] = current_row_team
+
+    return players
