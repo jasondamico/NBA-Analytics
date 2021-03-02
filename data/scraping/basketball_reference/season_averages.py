@@ -16,7 +16,7 @@ def get_player_team_map(season):
     """
     season = convert_bdl_season_to_bball_ref(season)
 
-    url = BASE_URL + f"NBA_{season}_totals.html"
+    url = BASE_URL + f"NBA_{season}_per_game.html"
 
     page = requests.get(url)
 
