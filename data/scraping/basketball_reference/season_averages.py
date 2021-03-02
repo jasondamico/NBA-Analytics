@@ -25,7 +25,7 @@ def get_player_team_map(season):
 
     soup = BeautifulSoup(page.content, 'html.parser')
 
-    table = soup.find(id="totals_stats")
+    table = soup.find(id="per_game_stats")
     trs = table.find_all("tr", {"class":["full_table", "partial_table"]})
 
     player_team_map = {}
