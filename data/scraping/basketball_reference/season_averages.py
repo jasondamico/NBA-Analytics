@@ -2,16 +2,18 @@
 Retrieves the team a group of players played on in a specified season according to basketball-reference.com
 """
 
+import pandas as pd
+
 from .bball_ref_utils import *
 from .team_abbreviation_dict import team_abbreviation_dict
 
 BASE_URL = "https://www.basketball-reference.com/leagues/"
 
-def load_full_season_stats(season):
+def get_full_season_stats(season):
     """
-    Loads the season averages of all of the players who played in the passed season.
+    Returns a list containing the season averages of all of the players who played in the passed season.
         
-    :param season: The season from which season averages will be loaded.
+    :param season: The season from which season averages will be returned.
     :return: A list of dictionaries holding the season average statistics of all the players in the passed season.
     """
     season = convert_bdl_season_to_bball_ref(season)
@@ -73,3 +75,15 @@ def get_rows_dict(trs):
                 player["team_id"] = current_row_team
 
     return players
+
+def get_full_season_stats_df(season):
+    """
+    Returns a pandas DataFrame holding the season average statistics of all players in the passed season.
+
+    :param season: The season from which season averages will be returned.
+    :return: A pandas DataFrame holding the season average statistics of all the players in the passed season.
+    """
+    stats = get_full_season_stats(season)
+    stats_df = pd.DataFrame.from_dict(stats)
+
+    return stats_df
