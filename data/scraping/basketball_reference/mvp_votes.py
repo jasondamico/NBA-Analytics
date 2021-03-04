@@ -5,7 +5,7 @@ Performs web scraping of basketball-reference.com to obtain MVP voting stats.
 from .bball_ref_utils import *
 
 BASE_URL = "https://www.basketball-reference.com/awards/"
-RELEVANT_COL_NAMES = ["player", "votes_first", "points_won", "points_max", "award_share"]
+RELEVANT_COL_NAMES = ["votes_first", "points_won", "points_max", "award_share"]
 
 def get_mvp_voting_map(season):
     """
