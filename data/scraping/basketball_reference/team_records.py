@@ -23,8 +23,12 @@ def get_team_record_map(season):
 
     soup = BeautifulSoup(page.content, 'html.parser')
 
-    east_table = soup.find(id='confs_standings_E')
-    west_table = soup.find(id='confs_standings_W')
+    if season >= 2015:
+        east_table = soup.find(id='confs_standings_E')
+        west_table = soup.find(id='confs_standings_W')
+    else:
+        east_table = soup.find(id='divs_standings_E')
+        west_table = soup.find(id='divs_standings_W')
 
     # tuple holding both table objects for ease of further scraping
     record_tables = (east_table, west_table)
