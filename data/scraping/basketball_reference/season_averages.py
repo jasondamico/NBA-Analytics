@@ -2,17 +2,17 @@
 Retrieves the team a group of players played on in a specified season according to basketball-reference.com
 """
 
-from bball_ref_utils import *
-from team_abbreviation_dict import team_abbreviation_dict
+from .bball_ref_utils import *
+from .team_abbreviation_dict import team_abbreviation_dict
 
 BASE_URL = "https://www.basketball-reference.com/leagues/"
 
-def get_player_team_map(season):
+def load_full_season_stats(season):
     """
-    Given a passed season, returns a map of player names and the team they played for in that season.
-
-    :param season: The season from which a map of team records will be returned.
-    :return: A map linking team names to the record they had in the passed season.
+    Loads the season averages of all of the players who played in the passed season.
+        
+    :param season: The season from which season averages will be loaded.
+    :return: A list of dictionaries holding the season average statistics of all the players in the passed season.
     """
     season = convert_bdl_season_to_bball_ref(season)
 
@@ -30,6 +30,12 @@ def get_player_team_map(season):
     return get_rows_dict(trs)
 
 def get_rows_dict(trs):
+    """
+    Returns a list of dictionaries, where each dictionary holds the data passed from a row in the passed list of <tr> tags.
+
+    :trs: A list of <tr> tags.
+    :return: A list of dictionaries containing the data held by each passed <tr> tag.
+    """
     players = []
     player = {}
 
