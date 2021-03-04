@@ -41,8 +41,6 @@ def download_mvp_stats():
                 # In absence of appending MVP votes, the same columns are filled with NaN for the current season
                 df.loc[:, mvp_votes.RELEVANT_COL_NAMES] = float("NaN")
 
-            drop_duplicate_cols(df)
-
             df.to_csv(complete_name, index=False)
 
     print("Completed load MVP stats.")
@@ -76,9 +74,7 @@ def get_appended_votes_df(stats_df, season):
     voting_maps_list = mvp_votes.get_mvp_voting_map(season)
     voting_maps_df = pd.DataFrame(voting_maps_list)
 
-    stats_df["full_name"] = stats_df["first_name"] + " " + stats_df["last_name"]
-
-    df_with_votes = pd.merge(stats_df, voting_maps_df, how="left", left_on="full_name", right_on="player")
+    df_with_votes = pd.merge(stats_df, voting_maps_df, how="left")
 
     df_with_votes.loc[:, mvp_votes.RELEVANT_COL_NAMES] = df_with_votes.loc[:, mvp_votes.RELEVANT_COL_NAMES].fillna(value=0)
 
