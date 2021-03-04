@@ -33,8 +33,12 @@ def get_rows_dict(trs):
     players = []
     player = {}
 
-    for i in range(len(trs)):
-        tr = trs[i]
+    for i in range(len(trs) + 1):
+        try:
+            tr = trs[i]
+        except:
+            players.append(player)  # Appends the final player, but exits loop and does not scrape as the table is complete
+            continue
 
         player_id = tr.find_all("td", {"data-stat":"player"})[0].get("data-append-csv")
 
