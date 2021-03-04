@@ -38,9 +38,11 @@ def get_rows_dict(trs):
 
         player_id = tr.find_all("td", {"data-stat":"player"})[0].get("data-append-csv")
 
-        if not bool(player) or player_id != player["id"]:   # i.e., if this isn't the first loop or the player id from this row is different than the previous row
-            players.append(player)  # This row is a different player than the previous row, meaning that the previous row may be stored
-            player = {}        
+        if bool(player) and player_id != player["id"]:   # i.e., if this isn't the first loop or the player id from this row is different than the previous row
+            players.append(player)  # This row is a different player than the previous row, meaning that the previous row may be stored        
+
+        if not bool(player) or player_id != player["id"]:
+            player = {}
 
             for td in tr.find_all("td"):    # Scrapes and stores data related to the player in this row
                 data_type = td.get("data-stat")
