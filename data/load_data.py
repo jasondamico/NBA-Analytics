@@ -10,10 +10,9 @@ currentdir = os.path.dirname(os.path.realpath(__file__))
 parentdir = os.path.dirname(currentdir)
 sys.path.append(parentdir)
 
-from api import ball_dont_lie_api
 import scraping.basketball_reference.mvp_votes as mvp_votes
-
-BDL = ball_dont_lie_api.BallDontLieAPI()
+import scraping.basketball_reference.team_records as team_records
+import scraping.basketball_reference.season_averages as season_averages
 
 CURRENT_SEASON = 2020
 FIRST_SEASON = 2000
@@ -23,11 +22,6 @@ def download_mvp_stats():
     Loads all of the data needed for MVP analysis.
     """
     print("Beginning load MVP stats...")
-
-    bdl = ball_dont_lie_api.BallDontLieAPI()
-
-    player_map = None
-    map_df = None
 
     for season in range(FIRST_SEASON, CURRENT_SEASON + 1):
         name = str(season) + "_stats.csv"
@@ -39,25 +33,17 @@ def download_mvp_stats():
         complete_name = os.path.join(csv_dir, name)
 
         if not csv_exists(complete_name):
-            # loads player_map, converts to a df if that has not been done yet
-            if not player_map and not map_df:
-                player_map = bdl.get_player_name_map()
-                map_df = pd.DataFrame.from_dict(player_map, orient="index", columns=["last_name", "first_name"])
-
-            bdl.load_full_season_stats(season)
-            df = bdl.get_pandas_df()
-
-            merged = pd.merge(map_df, df, how="right", left_index=True, right_on="player_id")
+            df = season_averages.get_full_season_stats_df(season)
            
             if season != CURRENT_SEASON:
-                merged = get_appended_votes_df(merged, season)
+                df = get_appended_votes_df(df, season)
             else:
                 # In absence of appending MVP votes, the same columns are filled with NaN for the current season
-                merged.loc[:, mvp_votes.RELEVANT_COL_NAMES] = float("NaN")
+                df.loc[:, mvp_votes.RELEVANT_COL_NAMES] = float("NaN")
 
-            drop_duplicate_cols(merged)
+            drop_duplicate_cols(df)
 
-            merged.to_csv(complete_name, index=False)
+            df.to_csv(complete_name, index=False)
 
     print("Completed load MVP stats.")
 
