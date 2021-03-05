@@ -41,6 +41,8 @@ def download_mvp_stats():
                 # In absence of appending MVP votes, the same columns are filled with NaN for the current season
                 df.loc[:, mvp_votes.RELEVANT_COL_NAMES] = float("NaN")
 
+            df = get_team_record_df(df, season)
+
             df.to_csv(complete_name, index=False)
 
     print("Completed load MVP stats.")
@@ -79,6 +81,19 @@ def get_appended_votes_df(stats_df, season):
     df_with_votes.loc[:, mvp_votes.RELEVANT_COL_NAMES] = df_with_votes.loc[:, mvp_votes.RELEVANT_COL_NAMES].fillna(value=0)
 
     return df_with_votes
+
+def get_team_record_df(stats_df, season):
+    """
+    Returns a DataFrame object identical to the one passed as an argument, but with the record of the team each player played for in the passed season appended to the DataFrame.
+
+    :param stats_df: A DataFrame object containing NBA season average statistics.
+    :param season: An integer value representing the season from which MVP voting should be retrieved. For instance, an inputted season value of 2019 returns the voting record from the 2019-2020 season. 
+    :return: An identical DataFrame object to the one passed, but with team winning percentages for the passed season appended.
+    """
+    record = team_records.get_team_record_map(season)
+    record_df = pd.DataFrame.from_dict(record, orient="index", columns=["winning_perc"])
+
+    return pd.merge(stats_df, record_df, how="left", left_on="team_id", right_index=True)
 
 def drop_duplicate_cols(stats_df):
     """
