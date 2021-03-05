@@ -23,8 +23,12 @@ def get_team_record_map(season):
 
     soup = BeautifulSoup(page.content, 'html.parser')
 
-    east_table = soup.find(id='confs_standings_E')
-    west_table = soup.find(id='confs_standings_W')
+    if season >= 2016:
+        east_table = soup.find(id='confs_standings_E')
+        west_table = soup.find(id='confs_standings_W')
+    else:
+        east_table = soup.find(id='divs_standings_E')
+        west_table = soup.find(id='divs_standings_W')
 
     # tuple holding both table objects for ease of further scraping
     record_tables = (east_table, west_table)
@@ -44,7 +48,10 @@ def get_team_record_map(season):
             td = valid_tds[i]
             th = valid_ths[i]
 
-            record_map[th.get_text().replace("*", "")] = td.get_text()
+            team_id = __get_team_id(th)
+            team_record = float(td.get_text())
+
+            record_map[team_id] = team_record
 
     return record_map
 
@@ -77,3 +84,15 @@ def __get_relevant_tds(tds):
             valid_tds.append(td)
 
     return valid_tds
+
+def __get_team_id(th):
+    """
+    Returns the three-letter team ID from the passed th tag.
+
+    :th: A th tag holding the name of an NBA team.
+    :return: The three-letter team ID that basketball-reference.com uses to identify the team.
+    """
+    url = str(th.find("a").get("href"))
+    team_id = url.replace("/teams/", "").split("/", 1)[0]     # Taking the three-letter team ID from the link to the team's individual page for the season
+
+    return team_id
