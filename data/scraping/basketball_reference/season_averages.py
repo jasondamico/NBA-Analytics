@@ -5,7 +5,6 @@ Retrieves the team a group of players played on in a specified season according 
 import pandas as pd
 
 from .bball_ref_utils import *
-from .team_abbreviation_dict import team_abbreviation_dict
 
 BASE_URL = "https://www.basketball-reference.com/leagues/"
 
