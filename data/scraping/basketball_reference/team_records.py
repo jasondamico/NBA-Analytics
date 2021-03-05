@@ -23,7 +23,7 @@ def get_team_record_map(season):
 
     soup = BeautifulSoup(page.content, 'html.parser')
 
-    if season >= 2015:
+    if season >= 2016:
         east_table = soup.find(id='confs_standings_E')
         west_table = soup.find(id='confs_standings_W')
     else:
