@@ -28,52 +28,7 @@ def get_full_season_stats(season):
     table = soup.find(id="per_game_stats")
     trs = table.find_all("tr", {"class":["full_table", "partial_table"]})
 
-    return get_rows_dict(trs)
-
-def get_rows_dict(trs):
-    """
-    Returns a list of dictionaries, where each dictionary holds the data passed from a row in the passed list of <tr> tags.
-
-    :trs: A list of <tr> tags.
-    :return: A list of dictionaries containing the data held by each passed <tr> tag.
-    """
-    players = []
-    player = {}
-
-    for i in range(len(trs) + 1):
-        try:
-            tr = trs[i]
-        except:
-            players.append(player)  # Appends the final player, but exits loop and does not scrape as the table is complete
-            continue
-
-        player_id = tr.find_all("td", {"data-stat":"player"})[0].get("data-append-csv")
-
-        if bool(player) and player_id != player["id"]:   # i.e., if this isn't the first loop or the player id from this row is different than the previous row
-            players.append(player)  # This row is a different player than the previous row, meaning that the previous row may be stored        
-
-        if not bool(player) or player_id != player["id"]:
-            player = {}
-
-            for td in tr.find_all("td"):    # Scrapes and stores data related to the player in this row
-                data_type = td.get("data-stat")
-                if data_type == "player":
-                    player["id"] = td.get("data-append-csv")    # A unique identifier used by basketball-reference.com
-                
-                player[data_type] = td.get_text()
-
-            player["multi_team_player"] = 0
-        else:   # Initializes multiple team handling sequence
-            player["multi_team_player"] = 1
-            stored_team_games = int(player["g"])
-            current_row_games_played = int(tr.find_all("td", {"data-stat":"g"})[0].get_text())
-
-            if player["team_id"] == "TOT" or current_row_games_played > stored_team_games:      # NOTE: The statistics of the player stored are their total season stats, but the team stored is the team they played the most games for
-                current_row_team = tr.find_all("td", {"data-stat":"team_id"})[0].get_text()
-                player["g"] = current_row_games_played
-                player["team_id"] = current_row_team
-
-    return players
+    return get_rows_dict(trs, store_new_player_season_averages, update_player_season_averages)
 
 def get_full_season_stats_df(season):
     """
@@ -86,3 +41,43 @@ def get_full_season_stats_df(season):
     stats_df = pd.DataFrame.from_dict(stats)
 
     return stats_df
+
+# Functions to pass to `get_rows_dict()`:
+
+def store_new_player_season_averages(tr):
+    """
+    Based on a passed <tr> tag, stores the essential season average statistics stored in the tag in a player dictionary and returns the dictionary.
+
+    :param tr: A <tr> tag containing data related to the season average staticstics of a singular player.
+    :return: A dictionary containing the season average statistics of the player represented by the passed <tr> tag.
+    """
+    player = {}
+
+    for td in tr.find_all("td"):    # Scrapes and stores data related to the player in this row
+        data_type = td.get("data-stat")
+        if data_type == "player":
+            player["id"] = td.get("data-append-csv")    # A unique identifier used by basketball-reference.com
+        
+        player[data_type] = td.get_text()
+
+    player["multi_team_player"] = 0
+
+    return player
+
+def update_player_season_averages(tr, player):
+    """
+    Handles the updating of season average statistics of the passed player given another passed <tr> tag that represents the same player as the one passed as a dictionary.
+
+    :param tr: A <tr> tag containing data related to the season average staticstics of a singular player (the same player represented by the player parameter).
+    :param player: A dictionary representing the season average statictics of a player that has played on multiple teams in one season.
+    :return: A dictionary containing the updated season average statistics of the player represented by the passed <tr> tag and dictionary.
+    """
+    stored_team_games = int(player["g"])
+    current_row_games_played = int(tr.find_all("td", {"data-stat":"g"})[0].get_text())
+
+    if player["team_id"] == "TOT" or current_row_games_played > stored_team_games:      # NOTE: The statistics of the player stored are their total season stats, but the team stored is the team they played the most games for
+        current_row_team = tr.find_all("td", {"data-stat":"team_id"})[0].get_text()
+        player["g"] = current_row_games_played
+        player["team_id"] = current_row_team
+
+    return player
