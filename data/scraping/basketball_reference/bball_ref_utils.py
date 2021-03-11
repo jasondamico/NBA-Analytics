@@ -14,13 +14,13 @@ def convert_bdl_season_to_bball_ref(season):
     """
     return season + 1
 
-def get_rows_dict(trs, store_new_player_func, update_player_func):
+def get_rows_dict(trs, store_new_player_func=None, update_player_func=None):
     """
     Returns a list of dictionaries, where each dictionary holds the data passed from a row in the passed list of <tr> tags.
 
     :param trs: A list of <tr> tags.
     :param store_new_player_func: A function that returns a dictionary stored given a <tr> tag passed to it. The client must pass a function that parses through and stores data in a dictionary to their liking.
-    :param update_player_func: A function that returns an updated dictionary in the event of a multi-team player. This function takes an argument of a <tr> tag representing a player that has been deemed as a multi-team player, with another argument containing the dictionary that currently represents the repeat player. The client should implement a function that updates and returns the passed dictionary to their liking given the data stored in the incoming <tr> tag.
+    :param update_player_func: A function that returns an updated dictionary in the event of a multi-team player. This function takes an argument of a <tr> tag representing a player that has been deemed as a multi-team player, with another argument containing the dictionary that currently represents the repeat player. The client should implement a function that updates and returns the passed dictionary to their liking given the data stored in the incoming <tr> tag. May be omitted if there is no purpose in updating the stored player when a new row is encountered.
     :return: A list of dictionaries containing the data held by each passed <tr> tag.
     """
     players = []
@@ -43,7 +43,8 @@ def get_rows_dict(trs, store_new_player_func, update_player_func):
         else:   # Initializes multiple team handling sequence
             player["multi_team_player"] = 1
 
-            player = update_player_func(tr, player)
+            if update_player_func:
+                player = update_player_func(tr, player)
 
     return players
 
