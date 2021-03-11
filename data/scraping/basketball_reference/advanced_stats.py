@@ -26,4 +26,26 @@ def get_full_advanced_stats(season):
     table = soup.find(id="advanced_stats")
     trs = table.find_all("tr", {"class":["full_table", "partial_table"]})
 
-    return get_rows_dict(trs)
+    return get_rows_dict(trs, store_new_player_func=store_new_player_advanced_stats, update_player_func=None)
+
+# Functions to pass to `get_rows_dict()`:
+
+def store_new_player_advanced_stats(tr):
+    """
+    Based on a passed <tr> tag, stores the essential advanced statistics stored in the tag in a player dictionary and returns the dictionary.
+
+    :param tr: A <tr> tag containing data related to the advanced season statistics of a singular player.
+    :return: A dictionary containing the advanced season statistics of the player represented by the passed <tr> tag.
+    """
+    player = {}
+
+    for td in tr.find_all("td"):    # Scrapes and stores data related to the player in this row
+        data_type = td.get("data-stat")
+        if data_type == "player":
+            player["id"] = td.get("data-append-csv")    # A unique identifier used by basketball-reference.com
+        
+        player[data_type] = td.get_text()
+
+    player["multi_team_player"] = 0
+
+    return player
