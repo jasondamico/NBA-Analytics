@@ -2,6 +2,8 @@
 Retrieves the advanced statistics of all the players in a given season via basketball-reference.com.
 """
 
+import pandas as pd
+
 from .bball_ref_utils import *
 
 BASE_URL = "https://www.basketball-reference.com/leagues/"
@@ -10,7 +12,7 @@ def get_full_advanced_stats(season):
     """
     Returns a list containing the advanced stats of all of the players who played in the passed season.
         
-    :param season: The season from which season averages will be returned.
+    :param season: The season from which advanced season statistics will be returned.
     :return: A list of dictionaries holding the advanced statistics of all the players in the passed season.
     """
     season = convert_bdl_season_to_bball_ref(season)
@@ -49,3 +51,15 @@ def store_new_player_advanced_stats(tr):
     player["multi_team_player"] = 0
 
     return player
+
+def get_full_advanced_stats_df(season):
+    """
+    Returns a pandas DataFrame holding the advanced season statistics of all players in the passed season.
+
+    :param season: The season from which advanced season statistics will be returned.
+    :return: A pandas DataFrame holding the advanced season statistics of all the players in the passed season.
+    """
+    stats = get_full_advanced_stats(season)
+    stats_df = pd.DataFrame.from_dict(stats)
+
+    return stats_df
