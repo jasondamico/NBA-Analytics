@@ -45,8 +45,9 @@ def store_new_player_advanced_stats(tr):
         data_type = td.get("data-stat")
         if data_type == "player":
             player["id"] = td.get("data-append-csv")    # A unique identifier used by basketball-reference.com
-        
-        player[data_type] = td.get_text()
+
+        if data_type not in ["ws-dum", "bpm-dum"]:
+            player[data_type] = td.get_text()
 
     player["multi_team_player"] = 0
 
