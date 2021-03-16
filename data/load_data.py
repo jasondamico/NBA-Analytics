@@ -13,6 +13,7 @@ sys.path.append(parentdir)
 import scraping.basketball_reference.mvp_votes as mvp_votes
 import scraping.basketball_reference.team_records as team_records
 import scraping.basketball_reference.season_averages as season_averages
+import scraping.basketball_reference.advanced_stats as advanced_stats
 
 CURRENT_SEASON = 2020
 FIRST_SEASON = 2000
@@ -42,6 +43,7 @@ def download_mvp_stats():
                 df.loc[:, mvp_votes.RELEVANT_COL_NAMES] = float("NaN")
 
             df = get_team_record_df(df, season)
+            df = get_advanced_stats_df(df, season)
 
             df.to_csv(complete_name, index=False)
 
@@ -94,6 +96,19 @@ def get_team_record_df(stats_df, season):
     record_df = pd.DataFrame.from_dict(record, orient="index", columns=["winning_perc"])
 
     return pd.merge(stats_df, record_df, how="left", left_on="team_id", right_index=True)
+
+def get_advanced_stats_df(stats_df, season):
+    """
+    Returns a DataFrame object identical to the one passed as an arguement, but with the advanced season stats of each player who played in the passed season appended to the DataFrame.
+
+    :param stats_df: A DataFrame object containing NBA season average statistics.
+    :param season: An integer value representing the season from which MVP voting should be retrieved. For instance, an inputted season value of 2019 returns the voting record from the 2019-2020 season. 
+    :return: An identical DataFrame to the one passed, but with the advanced season stats for the passed season appended.
+    """
+    advanced_stats_df = advanced_stats.get_full_advanced_stats_df(season)
+    cols_to_use = ["id"] + advanced_stats_df.columns.difference(stats_df.columns).to_list()
+    
+    return pd.merge(stats_df, advanced_stats_df[cols_to_use], how="left")
 
 def drop_duplicate_cols(stats_df):
     """
