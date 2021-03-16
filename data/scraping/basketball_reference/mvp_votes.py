@@ -5,7 +5,7 @@ Performs web scraping of basketball-reference.com to obtain MVP voting stats.
 from .bball_ref_utils import *
 
 BASE_URL = "https://www.basketball-reference.com/awards/"
-RELEVANT_COL_NAMES = ["votes_first", "points_won", "points_max", "award_share"]
+RELEVANT_COL_NAMES = ["player", "votes_first", "points_won", "points_max", "award_share"]
 
 def get_mvp_voting_map(season):
     """
@@ -36,7 +36,11 @@ def get_mvp_voting_map(season):
 
         for value in player:
             data_stat_val = value.get("data-stat")
-            val_map[data_stat_val] = value.get_text()
+            
+            if data_stat_val == "player":
+                val_map["id"] = value.get("data-append-csv")
+            else:
+                val_map[data_stat_val] = value.get_text()
 
         players_map.append(val_map)
 
