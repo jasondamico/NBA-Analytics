@@ -25,3 +25,27 @@ def get_full_league_leaders(season, fields):
     check_status_code(page, season)
 
     soup = BeautifulSoup(page.content, 'html.parser')
+
+def get_league_leader(soup_page, field):
+    """
+    Given a passed field and BeautifulSoup object of the league leaders page, returns the information about the first place player in that field in a dictionary.
+
+    :param soup_page: A BeautifulSoup object of the league leaders page.
+    :param field: The field from which the league leader will be returned. 
+    :return: A dictionary containing the id of the player leading the league in the given category and the name of the category they are leading the league in.
+    """
+    leaders_div = soup_page.find(id=f"leaders_{field}")     # The div containing the information of the league leaders of a certain field.
+
+    field_name = leaders_div.get("id")
+    index = field_name.index("leaders_") + len("leaders_")
+    field_name = field_name[index:]
+
+    table = leaders_div.find("table", "columns")    # this table contains the 20 leaders in the given field
+    first_place_tr = table.find("tr", "first_place")
+
+    league_leader = {
+        "player_id": get_player_id_from_url(first_place_tr.find("td", "who").find("a").get("href")),
+        "field": field_name
+    }
+
+    return league_leader
