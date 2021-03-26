@@ -25,6 +25,14 @@ def get_full_league_leaders(season, fields):
     check_status_code(page, season)
 
     soup = BeautifulSoup(page.content, 'html.parser')
+    
+    league_leaders = []
+
+    for field in fields:
+        field_leader = get_league_leader(soup, field)
+        league_leaders.append(field_leader)
+
+    return league_leaders
 
 def get_league_leader(soup_page, field):
     """
