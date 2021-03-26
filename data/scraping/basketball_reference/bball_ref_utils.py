@@ -61,3 +61,16 @@ def check_status_code(response, season):
         else:
             exception_message = "%d Error: %s" % (response.status_code, response.reason)
             raise Exception(exception_message)
+
+def get_player_id_from_url(url):
+    """
+    Retrieves and returns the player id from the URL to the player's profile page.
+
+    :param url: A URL linking to the profile page of a player (e.g., https://www.basketball-reference.com/players/b/bealbr01.html).
+    :return: The id of the player who is represented on the profile page linked.
+    """
+    # player id held between the last forward slash and the extention
+    left_index = url.rfind("/") + 1
+    right_index = url.index(".html")
+
+    return url[left_index: right_index]

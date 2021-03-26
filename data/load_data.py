@@ -3,6 +3,7 @@ Module containing functions related to loading and saving CSV files of player da
 """
 
 import pandas as pd
+import numpy as np
 import os.path
 
 import os, sys
@@ -14,9 +15,11 @@ import scraping.basketball_reference.mvp_votes as mvp_votes
 import scraping.basketball_reference.team_records as team_records
 import scraping.basketball_reference.season_averages as season_averages
 import scraping.basketball_reference.advanced_stats as advanced_stats
+import scraping.basketball_reference.league_leaders as league_leaders
 
 CURRENT_SEASON = 2020
 FIRST_SEASON = 2000
+SIGNIFICANT_STAT_CATEGORIES = ["pts_per_g", "ast_per_g", "trb_per_g", "blk_per_g", "stl_per_g"]
 
 def download_mvp_stats():
     """
@@ -44,6 +47,7 @@ def download_mvp_stats():
 
             df = get_team_record_df(df, season)
             df = get_advanced_stats_df(df, season)
+            df = get_league_leaders_df(df, season)
 
             df.to_csv(complete_name, index=False)
 
@@ -99,7 +103,7 @@ def get_team_record_df(stats_df, season):
 
 def get_advanced_stats_df(stats_df, season):
     """
-    Returns a DataFrame object identical to the one passed as an arguement, but with the advanced season stats of each player who played in the passed season appended to the DataFrame.
+    Returns a DataFrame object identical to the one passed as an argument, but with the advanced season stats of each player who played in the passed season appended to the DataFrame.
 
     :param stats_df: A DataFrame object containing NBA season average statistics.
     :param season: An integer value representing the season from which MVP voting should be retrieved. For instance, an inputted season value of 2019 returns the voting record from the 2019-2020 season. 
@@ -109,6 +113,25 @@ def get_advanced_stats_df(stats_df, season):
     cols_to_use = ["id"] + advanced_stats_df.columns.difference(stats_df.columns).to_list()
     
     return pd.merge(stats_df, advanced_stats_df[cols_to_use], how="left")
+
+def get_league_leaders_df(stats_df, season):
+    """
+    Returns a DataFrame object identical to the one passed as an argument, but with binary fields corresponding to whether or not each player led the league in a significant stat category.
+
+    :param stats_df: A DataFrame object containing NBA season average statistics.
+    :param season: An integer value representing the season from which MVP voting should be retrieved. For instance, an inputted season value of 2019 returns the voting record from the 2019-2020 season. 
+    :return: An identical DataFrame to the one passed, but with binary fields corresponding to whether or not each player led the league in a significant stat category appended.
+    """
+    to_return_df = stats_df
+    
+    league_leaders_df = league_leaders.get_full_league_leaders_df(season, SIGNIFICANT_STAT_CATEGORIES)
+    fields = league_leaders_df.field.unique().tolist()
+
+    for field in fields:
+        player_id = league_leaders_df.loc[league_leaders_df["field"] == field, "player_id"].item()
+        stats_df[f"leader_{field}"] = np.where(stats_df.id == player_id, 1, 0)
+
+    return to_return_df
 
 def drop_duplicate_cols(stats_df):
     """
