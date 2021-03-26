@@ -10,11 +10,11 @@ BASE_URL = "https://www.basketball-reference.com/leagues/"
 
 def get_full_league_leaders(season, fields):
     """
-    Returns a list containing information about the league leaders for the passed season.
+    Returns a list containing information about the league leaders for the passed fields in the specified season.
         
     :param season: The season from which league leaders statistics will be returned.
     :param fields: A list of strings containing the fields from which league leaders should be retrieved (e.g., "pts_per_g").
-    :return: A list of dictionaries holding the league leaders of all the players in the passed season.
+    :return: A list holding the league leaders of all the passed fields in the specified season.
     """
     season = convert_bdl_season_to_bball_ref(season)
 
@@ -57,3 +57,15 @@ def get_league_leader(soup_page, field):
     }
 
     return league_leader
+
+def get_full_league_leaders_df(season, fields):
+    """
+    Returns a DataFrame object containing information about the league leaders for the passed fields in the specified season.
+        
+    :param season: The season from which league leaders statistics will be returned.
+    :param fields: A list of strings containing the fields from which league leaders should be retrieved (e.g., "pts_per_g").
+    :return: A DataFrame object holding the league leaders of all the passed fields in the specified season.
+    """
+    league_leaders_list = get_full_league_leaders(season, fields)
+    
+    return pd.DataFrame.from_dict(league_leaders_list)
