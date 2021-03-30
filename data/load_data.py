@@ -43,7 +43,9 @@ def download_mvp_stats():
                 df = get_appended_votes_df(df, season)
             else:
                 # In absence of appending MVP votes, the same columns are filled with NaN for the current season
-                df.loc[:, mvp_votes.RELEVANT_COL_NAMES] = float("NaN")
+                voting_cols = mvp_votes.RELEVANT_COL_NAMES
+                voting_cols.remove("player")    # preserves the "player" column in the season averages df
+                df.loc[:, voting_cols] = float("NaN")
 
             df = get_team_record_df(df, season)
             df = get_advanced_stats_df(df, season)
