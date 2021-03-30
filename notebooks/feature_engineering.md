@@ -35,9 +35,9 @@ example_df["rank"] = example_df.points_won.rank(method="min", ascending=False)
 Another important and desired trait of this field is for players who did not receive votes to have `NaN` as their rank. This way, the MVP vote recipients are can be easily accessed by filtering out the rows with `NaN` as a value in the `rank` field.
 
 ```python
-temp.loc[temp.points_won == 0, "rank"] = float("nan")
+example_df.loc[example_df.points_won == 0, "rank"] = float("nan")
 ```
 
 ```python
-temp.loc[~temp["rank"].isna()]
+example_df.loc[~example_df["rank"].isna()]
 ```
