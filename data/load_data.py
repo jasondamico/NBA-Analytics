@@ -51,6 +51,8 @@ def download_mvp_stats():
             df = get_advanced_stats_df(df, season)
             df = get_league_leaders_df(df, season)
 
+            df = get_feature_engineered_df(df, season)
+
             df.to_csv(complete_name, index=False)
 
     print("Completed load MVP stats.")
@@ -134,6 +136,31 @@ def get_league_leaders_df(stats_df, season):
         stats_df[f"leader_{field}"] = np.where(stats_df.id == player_id, 1, 0)
 
     return to_return_df
+
+def get_feature_engineered_df(stats_df, season):
+    """
+    Returns a DataFrame object with feature engineering techniques (each of which is detailed in `notebooks/feature_engineering.ipynb`) are applied to the passed data.
+    
+    :param stats_df: A DataFrame object containing NBA season average statistics.
+    :param season: An integer value representing the season from which MVP voting should be retrieved. For instance, an inputted season value of 2019 returns the voting record from the 2019-2020 season. 
+    :return: An identical DataFrame to the one passed, but with fields feature engineered to prepare for insertion in a predictive model.
+    """
+    # 0. Convert all values from string to float/integer if number-like
+    stats_df = stats_df.apply(lambda column: convert_col_types(column), axis=0)
+    
+    return stats_df
+
+def convert_col_types(column):
+    """
+    Given a passed column from the season averages data with all string values, converts all number-like strings to floats or integers and returns a column holding the converted values. If a value stored is not number-like, then the original string value is still kept in its corresponding index.
+
+    :param column: An unformatted Series object representing the column of a NBA season average statistics DataFrame.
+    :return: A column with all number-like values in the passed columns converted to either integers or floats, with all other strings retaining their original value.
+    """
+    to_return_col = pd.to_numeric(column, errors="coerce")      # Converts all strings containing number-like values to floats or integers. All other values are filled with NaN
+    to_return_col = to_return_col.fillna(column)    # Fills all NaN values with their value from the original column
+    
+    return to_return_col
 
 def drop_duplicate_cols(stats_df):
     """
