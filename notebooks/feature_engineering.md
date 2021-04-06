@@ -74,3 +74,23 @@ display(df_final, df_final.dtypes)
 ```
 
 And, simple as that, the desired result is achieved: the `Age` and `Grade` columns are converted to `int64` and `float64`, respectively, while `Name` retains its original data type. Feature engineering may proceed.
+
+
+## 1. Adding ranks to MVP recipients
+
+### 1.1 Implementation 
+Adding ranks to the MVP vote recipients is as simple as using the pandas `Series.rank` method:
+
+```python
+example_df["rank"] = example_df.points_won.rank(method="min", ascending=False)
+```
+
+Another important and desired trait of this field is for players who did not receive votes to have `NaN` as their rank. This way, the MVP vote recipients are can be easily accessed by filtering out the rows with `NaN` as a value in the `rank` field.
+
+```python
+example_df.loc[example_df.points_won == 0, "rank"] = float("nan")
+```
+
+```python
+example_df.loc[~example_df["rank"].isna()]
+```
