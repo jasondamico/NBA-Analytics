@@ -38,6 +38,7 @@ def download_mvp_stats():
 
         if not csv_exists(complete_name):
             df = season_averages.get_full_season_stats_df(season)
+            df["season"] = season    # season column added to store the season represented by this DataFrame
            
             if season != CURRENT_SEASON:
                 df = get_appended_votes_df(df, season)
