@@ -149,6 +149,10 @@ def get_feature_engineered_df(stats_df, season):
     # 0. Convert all values from string to float/integer if number-like
     stats_df = stats_df.apply(lambda column: convert_col_types(column), axis=0)
     
+    # 1. Add MVP voting rank
+    stats_df["rank"] = stats_df.points_won.rank(method="min", ascending=False)
+    stats_df.loc[stats_df.points_won == 0, "rank"] = float("nan")
+    
     return stats_df
 
 def convert_col_types(column):
