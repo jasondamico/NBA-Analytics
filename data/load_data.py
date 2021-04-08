@@ -163,7 +163,8 @@ def convert_col_types(column):
     :return: A column with all number-like values in the passed columns converted to either integers or floats, with all other strings retaining their original value.
     """
     to_return_col = pd.to_numeric(column, errors="coerce")      # Converts all strings containing number-like values to floats or integers. All other values are filled with NaN
-    to_return_col = to_return_col.fillna(column)    # Fills all NaN values with their value from the original column
+    if to_return_col.isna().sum() == len(to_return_col):    #
+        to_return_col = to_return_col.fillna(column)    # Fills all NaN values with their value from the original column
     
     return to_return_col
 

@@ -31,7 +31,8 @@ Before doing any feature engineering, it must be noted that the data stored in t
 data = {
     "Name":["Peter", "Paul", "Trisha", "Joseph"],
     "Age":["20", "21", "19", "18"],
-    "Grade":[90.3, "91", "89.2", 95]
+    "Grade":[90.3, "91", "89.2", 95],
+    "GPA":["87.5", "", "94.5", "90.0"]
 }
 
 df = pd.DataFrame(data)
@@ -50,9 +51,16 @@ df_to_numeric = df.apply(lambda column: pd.to_numeric(column, errors="coerce"))
 display(df_to_numeric, df_to_numeric.dtypes)
 ```
 
-This gets us part of the way there: both `Age` and `Grade` were converted to their expected data types (`int64` and `float64`, respectively), despite the fact that mixed data types were stored in each array. However, as can be seen, the `Name` column is converted to type `float64` when using a keyword argument of `coerce`, which is necessary to convert strings with decimal values to floats. Ideally, these values should be kept the same; there is no need to convert *non*-number-like strings to numeric values. 
+This gets us part of the way there: `Age`, `Grade` and `GPA` were converted to their expected data types (`int64` and `float64`, respectively), despite the fact that mixed data types were stored in each array. However, as can be seen, the `Name` column is converted to type `float64` when using a keyword argument of `coerce`, which is necessary to convert strings with decimal values to floats. Ideally, these values should be kept the same; there is no need to convert *non*-number-like strings to numeric values. 
 
 We will use `fillna` to fill the `NaN` values with their original value in the following function:
+
+```python
+df_to_numeric = df.apply(lambda column: pd.to_numeric(column, errors="coerce").fillna(column))
+display(df_to_numeric, df_to_numeric.dtypes)
+```
+
+Unfortunately, we still have one holdout column: `GPA`, the column that included an empty string, which the converter function still thinks is an entire column of strings. However, we still want to preserve the `fillna()` functionality for columns that *actually* are only full of strings, so we will add a conditional statement to preserve columns that are a mix of floats and strings:
 
 ```python
 def convert_col_types(column):
@@ -63,7 +71,8 @@ def convert_col_types(column):
     :return: A column with all number-like values in the passed columns converted to either integers or floats, with all other strings retaining their original value.
     """
     to_return_col = pd.to_numeric(column, errors="coerce")      # Converts all strings containing number-like values to floats or integers. All other values are filled with NaN
-    to_return_col = to_return_col.fillna(column)    # Fills all NaN values with their value from the original column
+    if to_return_col.isna().sum() == len(to_return_col):    # Only performs `fillna()` for columns that are full of NaN values, or columns full of non number-like strings
+        to_return_col = to_return_col.fillna(column)    # Fills all NaN values with their value from the original column
     
     return to_return_col
 ```
@@ -125,4 +134,11 @@ For example, Celtics player Jaylen Brown, who averaged 20.3 points per game in 2
 ```python
 jaylen_index = example_df.loc[example_df["player"] == "Jaylen Brown"].index.tolist()[0]
 example_df.loc[[league_leader_index, jaylen_index], ["id", "player", "team_id", "pts_per_g", "scaled_pts_per_g"]]
+```
+
+```python
+scaled_fields = ["pts_per_g", "ast_per_g", "trb_per_g", "blk_per_g", "stl_per_g", "tov_per_g", "efg_pct"]   # fields that are used to create new scaled fields
+    
+for field in scaled_fields:
+    stats_df = scale_field(example_df, field)
 ```
