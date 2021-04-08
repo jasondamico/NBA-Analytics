@@ -94,3 +94,35 @@ example_df.loc[example_df.points_won == 0, "rank"] = float("nan")
 ```python
 example_df.loc[~example_df["rank"].isna()]
 ```
+
+## 2. Scaling major season averages fields
+
+While raw season averages are important for analysis, it must be noted that MVP voting is based purely on the performance of players over the course of the season that voting occurs. Therefore, all player performances over the course of a single season are compared to one another to determine who is most worthy of MVP votes.
+
+### 2.1 Implementation
+
+To reflect this convention within this project, scaled fields that are scaled on a 0-1 scale proportional to the distribution of players within that field. 
+
+For instance, in 2019, James Harden led the league with 34.3 points per game, so his scaled points per game value for the 2019 season would be 1. Any other player would have a scaled points per game value relative to his performance compared to that of the league leader (their points per game value divided by the points per game value of Harden).
+
+```python
+league_leader_index = example_df["pts_per_g"].idxmax()
+example_df.loc[league_leader_index, ["id", "player", "team_id", "pts_per_g"]]
+```
+
+The following function takes an argument of `field`, which is used to determine the league leader and then scale the remaining values.
+
+```python
+def scale_field(stats_df, field):
+    league_leader = stats_df[field].max()
+    stats_df[f"scaled_{field}"] = stats_df[field] / league_leader   # league leader has value of 1, all other rows are a decimal value in range [0, 1)
+    
+scale_field(example_df, "pts_per_g")
+```
+
+For example, Celtics player Jaylen Brown, who averaged 20.3 points per game in 2019, would have a scaled points per game value of 0.592 (20.3 / 34.3).
+
+```python
+jaylen_index = example_df.loc[example_df["player"] == "Jaylen Brown"].index.tolist()[0]
+example_df.loc[[league_leader_index, jaylen_index], ["id", "player", "team_id", "pts_per_g", "scaled_pts_per_g"]]
+```
