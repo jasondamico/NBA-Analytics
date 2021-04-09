@@ -129,9 +129,14 @@ example_df.loc[example_df["id"] == league_leader_id, ["id", "player", "team_id",
 
 The following function takes an argument of `field`, which is used to determine the league leader and then scale the remaining values.
 
+Note that if the passed field is not found on the basketball-reference.com league leaders page for the season specified, then a custom error of `FieldNotFound` is raised. In this case (which is only for the more obscure data fields), the exception is caught and the maximum value of the passed field is used as the league leader value.
+
 ```python
 def scale_field(stats_df, season, field):
-    league_leader_value = league_leaders.get_league_leader(season, field)["value"]
+    try:
+        league_leader_value = league_leaders.get_league_leader(season, field)["value"]
+    except league_leaders.FieldNotFound:    # Some fields are not found on the basketball-reference.com league leaders page, exception raised in this case
+        league_leader_value = stats_df[field].max()
     stats_df[f"scaled_{field}"] = stats_df[field] / league_leader_value   # league leader has value of 1, all other rows are a decimal value in range [0, 1)
     
 scale_field(example_df, 2019, "pts_per_g")

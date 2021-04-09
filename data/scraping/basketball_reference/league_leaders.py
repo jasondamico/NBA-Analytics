@@ -65,7 +65,10 @@ def get_league_leader_from_soup_page(soup_page, field):
     """
     leaders_div = soup_page.find(id=f"leaders_{field}")     # The div containing the information of the league leaders of a certain field.
 
-    field_name = leaders_div.get("id")
+    try:
+        field_name = leaders_div.get("id")
+    except:
+        raise FieldNotFound(f"League leader for field {field} not found.")
     index = field_name.index("leaders_") + len("leaders_")
     field_name = field_name[index:]
 
@@ -91,3 +94,6 @@ def get_full_league_leaders_df(season, fields):
     league_leaders_list = get_full_league_leaders(season, fields)
     
     return pd.DataFrame.from_dict(league_leaders_list)
+
+class FieldNotFound(Exception):
+    pass

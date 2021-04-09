@@ -183,7 +183,11 @@ def scale_field(stats_df, season, field):
     :param field: The field which will be scaled proportional to the league leader.
     :return: An identical DataFrame as the one passed as `stats_df`, but with the new scaled field appended.
     """
-    league_leader_value = league_leaders.get_league_leader(season, field)["value"]
+    try:
+        league_leader_value = league_leaders.get_league_leader(season, field)["value"]
+    except league_leaders.FieldNotFound:    # Some fields are not found on the basketball-reference.com league leaders page, exception raised in this case
+        league_leader_value = stats_df[field].max()
+
     stats_df[f"scaled_{field}"] = stats_df[field] / league_leader_value     # league leader has value of 1, all other rows are a decimal value in range [0, 1)
     
     return stats_df
