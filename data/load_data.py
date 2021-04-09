@@ -157,7 +157,7 @@ def get_feature_engineered_df(stats_df, season):
     scaled_fields = ["pts_per_g", "ast_per_g", "trb_per_g", "blk_per_g", "stl_per_g", "tov_per_g", "efg_pct"]   # fields that are used to create new scaled fields
     
     for field in scaled_fields:
-        stats_df = scale_field(stats_df, field)
+        stats_df = scale_field(stats_df, season, field)
     
     return stats_df
 
@@ -174,16 +174,17 @@ def convert_col_types(column):
     
     return to_return_col
 
-def scale_field(stats_df, field):
+def scale_field(stats_df, season, field):
     """
     Given a passed DataFrame and field, scales that field proportional to the league leader - the league leader in that field has a value of 1, all other players have a scaled value of their stat value divided by the stat value of the league leader.
     
     :param stats_df: A DataFrame object containing NBA season average statistics.
+    :param season: An integer value representing the season from which MVP voting should be retrieved. For instance, an inputted season value of 2019 returns the voting record from the 2019-2020 season. 
     :param field: The field which will be scaled proportional to the league leader.
     :return: An identical DataFrame as the one passed as `stats_df`, but with the new scaled field appended.
     """
-    league_leader = stats_df[field].max()
-    stats_df[f"scaled_{field}"] = stats_df[field] / league_leader   # league leader has value of 1, all other rows are a decimal value in range [0, 1)
+    league_leader_value = league_leaders.get_league_leader(season, field)["value"]
+    stats_df[f"scaled_{field}"] = stats_df[field] / league_leader_value     # league leader has value of 1, all other rows are a decimal value in range [0, 1)
     
     return stats_df
 

@@ -82,7 +82,7 @@ df_final = df.apply(lambda column: convert_col_types(column))
 display(df_final, df_final.dtypes)
 ```
 
-And, simple as that, the desired result is achieved: the `Age` and `Grade` columns are converted to `int64` and `float64`, respectively, while `Name` retains its original data type. Feature engineering may proceed.
+And, simple as that, the desired result is achieved: the `Age`, `Grade` and `GPA` columns are converted to `int64`, `float64` and `float64`, respectively, while `Name` retains its original data type. Feature engineering may proceed.
 
 
 ## 1. Adding ranks to MVP recipients
@@ -110,35 +110,36 @@ While raw season averages are important for analysis, it must be noted that MVP 
 
 ### 2.1 Implementation
 
-To reflect this convention within this project, scaled fields that are scaled on a 0-1 scale proportional to the distribution of players within that field. 
+To reflect this convention within this project, scaled fields are scaled on a 0-1 scale proportional to the distribution of players within that field. 
 
 For instance, in 2019, James Harden led the league with 34.3 points per game, so his scaled points per game value for the 2019 season would be 1. Any other player would have a scaled points per game value relative to his performance compared to that of the league leader (their points per game value divided by the points per game value of Harden).
 
+While we note that we can manually get the maximum value of each column, effectively getting the league leader, we instead use the `data.scraping.basketball_reference.league_leaders` library to retrieve the league leader from the given field, as [basketball-reference.com takes accepted conventions such as minimum attempts into account when selecting the league leader for a given field](https://www.basketball-reference.com/about/rate_stat_req.html).
+
 ```python
-league_leader_index = example_df["pts_per_g"].idxmax()
-example_df.loc[league_leader_index, ["id", "player", "team_id", "pts_per_g"]]
+import sys
+sys.path.insert(1, "../")
+import data.scraping.basketball_reference.league_leaders as league_leaders
+```
+
+```python
+league_leader_id = league_leaders.get_league_leader(2019, "pts_per_g")["player_id"]
+example_df.loc[example_df["id"] == league_leader_id, ["id", "player", "team_id", "pts_per_g"]]
 ```
 
 The following function takes an argument of `field`, which is used to determine the league leader and then scale the remaining values.
 
 ```python
-def scale_field(stats_df, field):
-    league_leader = stats_df[field].max()
-    stats_df[f"scaled_{field}"] = stats_df[field] / league_leader   # league leader has value of 1, all other rows are a decimal value in range [0, 1)
+def scale_field(stats_df, season, field):
+    league_leader_value = league_leaders.get_league_leader(season, field)["value"]
+    stats_df[f"scaled_{field}"] = stats_df[field] / league_leader_value   # league leader has value of 1, all other rows are a decimal value in range [0, 1)
     
-scale_field(example_df, "pts_per_g")
+scale_field(example_df, 2019, "pts_per_g")
 ```
 
 For example, Celtics player Jaylen Brown, who averaged 20.3 points per game in 2019, would have a scaled points per game value of 0.592 (20.3 / 34.3).
 
 ```python
-jaylen_index = example_df.loc[example_df["player"] == "Jaylen Brown"].index.tolist()[0]
-example_df.loc[[league_leader_index, jaylen_index], ["id", "player", "team_id", "pts_per_g", "scaled_pts_per_g"]]
-```
-
-```python
-scaled_fields = ["pts_per_g", "ast_per_g", "trb_per_g", "blk_per_g", "stl_per_g", "tov_per_g", "efg_pct"]   # fields that are used to create new scaled fields
-    
-for field in scaled_fields:
-    stats_df = scale_field(example_df, field)
+jaylen_id = example_df.loc[example_df["player"] == "Jaylen Brown"].id.tolist()[0]
+example_df.loc[example_df["id"].isin([league_leader_id, jaylen_id]), ["id", "player", "team_id", "pts_per_g", "scaled_pts_per_g"]]
 ```
