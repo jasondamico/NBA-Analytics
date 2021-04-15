@@ -74,3 +74,8 @@ def get_player_id_from_url(url):
     right_index = url.index(".html")
 
     return url[left_index: right_index]
+
+
+class BBallReferenceScraper:
+    def __init__(self, season, url):
+        pass
