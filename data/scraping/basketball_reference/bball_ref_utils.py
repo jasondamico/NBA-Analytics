@@ -78,4 +78,71 @@ def get_player_id_from_url(url):
 
 class BBallReferenceScraper:
     def __init__(self, season, url):
-        pass
+        """
+        Initializes a BBallReferenceScraper object that will scrape the passed URL after formatting with the passed season intended to be scraped.
+
+        :param season: The season from which data will be scraped.
+        :param url: An unformatted URL (with curled brackets replacing the season) which will be used to scrape data from.
+        """
+        self.__season = season
+        self.__soup_page = self.__convert_url_to_soup_object(url)
+
+        self.__data = None
+
+    """
+    GETTER METHODS
+    """
+
+    def get_season(self):
+        """
+        Returns the season that data will be scraped from.
+
+        :return: The season from which data will be scraped.
+        """
+        return self.__season
+
+    def get_data(self):
+        """
+        Returns the scraped data stored in the object.
+
+        :return: The data stored in the BBallReferenceScraper object.
+        """
+        return self.__data
+
+    """
+    SETTER METHODS
+    """
+
+    def set_data(self, data):
+        """
+        Stores the passed scraped data into the `data` instance variable.
+
+        :param data: Scraped data to be stored within the `data` instance variable.
+        """
+        self.__data = data
+
+    def __set_season(self, season):
+        """
+        Stores the passed season that data will be scraped from.
+
+        :param season: The NBA season from which data will be scraped.
+        """
+        self.__season = season
+
+    """
+    UTILITY METHODS
+    """
+
+    def __convert_url_to_soup_object(self, url):
+        """
+        Given a passed URL, returns a BeautifulSoup object containing the data.
+
+        :param url: An unformatted URL from which a BeautifulSoup object is created.
+        :return: A BeautifulSoup object initialized with the passed URL after formatting.
+        """
+        formatted_url = url.format(self.convert_bdl_season_to_bball_ref(self.get_season()))
+        
+        page = requests.get(formatted_url)
+        self.check_status_code(page)
+
+        return BeautifulSoup(page.content, 'html.parser')
