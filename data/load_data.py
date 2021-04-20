@@ -202,3 +202,12 @@ def drop_duplicate_cols(stats_df):
     intersection_list = list(set(stats_df.columns).intersection(["full_name", "player"]))
 
     stats_df.drop(intersection_list, axis=1, inplace=True)
+
+def get_total_points_available(stats_df, points_field="points_won"):
+    """
+    Given a passed DataFrame including voting from a season, returns the total amount of MVP points that were available to all players (i.e., the sum of all of the points awarded to players in MVP voting).
+
+    :param stats_df: A DataFrame object containing NBA season average statistics.
+    :param points_field: The field in which player points are held. "points_won" by default.
+    """
+    return stats_df[points_field].sum()
